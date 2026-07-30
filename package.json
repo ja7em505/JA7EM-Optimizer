@@ -1,0 +1,47 @@
+{
+    "name":  "ja7em-optimizer",
+    "version":  "1.1.0",
+    "description":  "JA7EM PC Optimizer - Boost FPS, Update Drivers, Clean System",
+    "main":  "src/main/main.js",
+    "scripts":  {
+                    "start":  "electron .",
+                    "dev":  "electron . --dev",
+                    "build":  "electron-builder build --win --publish never",
+                    "pack":  "electron-builder build --dir",
+                    "pack-portable":  "electron-packager . \"JA7EM Optimizer\" --platform=win32 --arch=x64 --icon=assets/icon.ico --overwrite --out=dist --asar",
+                    "obfuscate":  "node scripts/obfuscate.js",
+                    "build-secure":  "node scripts/obfuscate.js \u0026\u0026 electron-packager . \"JA7EM Optimizer\" --platform=win32 --arch=x64 --icon=assets/icon.ico --overwrite --out=dist --asar"
+                },
+    "author":  "JA7EM",
+    "license":  "MIT",
+    "devDependencies":  {
+                            "electron":  "^37.0.0",
+                            "electron-builder":  "^25.0.0",
+                            "electron-packager":  "^17.1.2",
+                            "javascript-obfuscator":  "^5.5.0",
+                            "png-to-ico":  "^3.0.2"
+                        },
+    "dependencies":  {
+                         "electron-updater":  "^6.8.9",
+                         "systeminformation":  "^5.22.0",
+                         "tesseract.js":  "^7.0.0"
+                     },
+    "build":  {
+                  "appId":  "com.ja7em.optimizer",
+                  "productName":  "JA7EM Optimizer",
+                  "publish":  {
+                                  "provider":  "github",
+                                  "owner":  "JA7EM",
+                                  "repo":  "JA7EM-Optimizer"
+                              },
+                  "win":  {
+                              "target":  "nsis",
+                              "icon":  "assets/icon.ico",
+                              "sign":  false
+                          },
+                  "nsis":  {
+                               "oneClick":  false,
+                               "allowToChangeInstallationDirectory":  true
+                           }
+              }
+}

@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JA7EM Optimizer</title>
+  <link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+  <div id="license-screen" style="position:fixed; top:0; left:0; right:0; bottom:0; z-index:10000; background:linear-gradient(135deg, #0a0a1a, #1a0a2e, #0a1a2e); display:flex; align-items:center; justify-content:center;">
+    <div style="text-align:center; max-width:500px; width:90%;">
+      <div style="font-size:3em; margin-bottom:10px; background:linear-gradient(135deg, #00d4ff, #7c3aed, #f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:bold;">JA7EM</div>
+      <div style="font-size:1.2em; color:#888; margin-bottom:30px;">Optimizer</div>
+
+      <div id="license-activate-section">
+        <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:30px;">
+          <h2 style="color:#00d4ff; margin-bottom:8px; font-size:1.3em;">&#128274; Activate License</h2>
+          <p style="color:#888; margin-bottom:20px; font-size:0.9em;">Enter your license key to activate JA7EM Optimizer</p>
+          <input id="license-key-input" type="text" placeholder="JA7EM-XXXX-XXXX-XXXX" style="width:100%; padding:14px 16px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#fff; font-size:1.2em; text-align:center; font-family:monospace; letter-spacing:2px; margin-bottom:16px; outline:none;">
+          <button id="activate-btn" onclick="activateLicense()" style="width:100%; padding:14px; background:linear-gradient(135deg, #22c55e, #10b981); border:none; border-radius:8px; color:#fff; font-size:1.1em; font-weight:bold; cursor:pointer;">Activate</button>
+          <div id="license-msg" style="margin-top:12px;"></div>
+          <p style="color:#555; margin-top:16px; font-size:0.8em;">Don't have a key? Contact JA7EM on Discord: ja7em_</p>
+        </div>
+      </div>
+
+      <div id="license-info-section" style="display:none;">
+        <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:30px;">
+          <div style="font-size:4em; margin-bottom:10px;">&#10004;&#65039;</div>
+          <h2 style="color:#22c55e; margin-bottom:16px; font-size:1.4em;">License Active</h2>
+
+          <div id="license-key-display" style="background:rgba(0,0,0,0.3); padding:12px 20px; border-radius:8px; font-family:monospace; font-size:1.1em; color:#00ff88; margin-bottom:16px; border:1px solid rgba(0,255,136,0.2);"></div>
+
+          <div id="license-type-display" style="color:#888; margin-bottom:8px; font-size:0.9em;"></div>
+
+          <div id="license-expiry-box" style="background:rgba(124,58,237,0.15); border:1px solid rgba(124,58,237,0.3); border-radius:12px; padding:16px; margin-bottom:16px;">
+            <div style="color:#888; font-size:0.85em; margin-bottom:6px;">Time Remaining</div>
+            <div id="license-countdown" style="font-size:1.8em; font-weight:bold; background:linear-gradient(135deg, #7c3aed, #00d4ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"></div>
+            <div id="license-expiry-date" style="color:#666; font-size:0.8em; margin-top:4px;"></div>
+          </div>
+
+          <button onclick="deactivateLicense()" style="width:100%; padding:12px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:8px; color:#ef4444; font-size:0.9em; cursor:pointer;">Deactivate License</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="app">
+    <div class="titlebar">
+      <div class="titlebar-controls">
+        <button class="btn-close" onclick="electronAPI.close()">✕</button>
+        <button class="btn-maximize" onclick="electronAPI.maximize()">□</button>
+        <button class="btn-minimize" onclick="electronAPI.minimize()">─</button>
+      </div>
+      <div class="titlebar-title">
+        <span class="logo">JA7EM</span> Optimizer
+      </div>
+    </div>
+
+    <div class="container">
+      <nav class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo-large">JA7EM</div>
+          <div class="version">v1.1.0</div>
+        </div>
+        <ul class="nav-menu">
+          <li>
+            <div class="nav-section" onclick="toggleNavSection(this)">
+              <span>🏠 الرئيسية</span>
+              <span class="nav-arrow">▾</span>
+            </div>
+            <ul class="nav-items-group">
+              <li class="nav-item active" data-page="dashboard">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">لوحة التحكم</span>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <div class="nav-section" onclick="toggleNavSection(this)">
+              <span>🎮 الألعاب</span>
+              <span class="nav-arrow">▾</span>
+            </div>
+            <ul class="nav-items-group">
+              <li class="nav-item" data-page="gamemode">
+                <span class="nav-icon">🎯</span>
+                <span class="nav-text">وضع الألعاب</span>
+              </li>
+              <li class="nav-item" data-page="fps">
+                <span class="nav-icon">🎮</span>
+                <span class="nav-text">تحسين FPS</span>
+              </li>
+              <li class="nav-item" data-page="stutter">
+                <span class="nav-icon">⚡</span>
+                <span class="nav-text">إصلاح الفريمات</span>
+              </li>
+              <li class="nav-item" data-page="games">
+                <span class="nav-icon">🔧</span>
+                <span class="nav-text">تعديل الألعاب</span>
+              </li>
+              <li class="nav-item" data-page="gpu">
+                <span class="nav-icon">🖥️</span>
+                <span class="nav-text">تحسين GPU</span>
+              </li>
+              <li class="nav-item" data-page="mousefix">
+                <span class="nav-icon">🖱️</span>
+                <span class="nav-text">تحسين الماوس</span>
+              </li>
+              <li class="nav-item" data-page="gametranslator">
+                <span class="nav-icon">🌍</span>
+                <span class="nav-text">مترجم الألعاب</span>
+              </li>
+              <li class="nav-item" data-page="fpsoverlay">
+                <span class="nav-icon">📟</span>
+                <span class="nav-text">FPS Overlay</span>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <div class="nav-section" onclick="toggleNavSection(this)">
+              <span>🌐 الشبكة</span>
+              <span class="nav-arrow">▾</span>
+            </div>
+            <ul class="nav-items-group">
+              <li class="nav-item" data-page="netmanager">
+                <span class="nav-icon">📡</span>
+                <span class="nav-text">مدير الشبكة</span>
+              </li>
+              <li class="nav-item" data-page="netoptimize">
+                <span class="nav-icon">⚡</span>
+                <span class="nav-text">تحسين الشبكة</span>
+              </li>
+              <li class="nav-item" data-page="turboboost">
+                <span class="nav-icon">🚀</span>
+                <span class="nav-text">Network Turboboost</span>
+              </li>
+              <li class="nav-item" data-page="netrepair">
+                <span class="nav-icon">🔧</span>
+                <span class="nav-text">إصلاح الإنترنت</span>
+              </li>
+              <li class="nav-item" data-page="netmon">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">مراقبة الاتصال</span>
+              </li>
+              <li class="nav-item" data-page="wifi">
+                <span class="nav-icon">📶</span>
+                <span class="nav-text">محلل WiFi</span>
+              </li>
+              <li class="nav-item" data-page="pingmon">
+                <span class="nav-icon">🏓</span>
+                <span class="nav-text">مراقب Ping</span>
+              </li>
+              <li class="nav-item" data-page="speedtest">
+                <span class="nav-icon">🚀</span>
+                <span class="nav-text">اختبار السرعة</span>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <div class="nav-section" onclick="toggleNavSection(this)">
+              <span>🔒 الأمان والخصوصية</span>
+              <span class="nav-arrow">▾</span>
+            </div>
+            <ul class="nav-items-group">
+              <li class="nav-item" data-page="defender">
+                <span class="nav-icon">🛡️</span>
+                <span class="nav-text">Windows Defender</span>
+              </li>
+              <li class="nav-item" data-page="privacy">
+                <span class="nav-icon">🔒</span>
+                <span class="nav-text">خصوصية النظام</span>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <div class="nav-section" onclick="toggleNavSection(this)">
+              <span>🖥️ النظام</span>
+              <span class="nav-arrow">▾</span>
+            </div>
+            <ul class="nav-items-group">
+              <li class="nav-item" data-page="monitor">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">مراقبة النظام</span>
+              </li>
+              <li class="nav-item" data-page="temp">
+                <span class="nav-icon">🌡️</span>
+                <span class="nav-text">مراقب الحرارة</span>
+              </li>
+              <li class="nav-item" data-page="sysinfo">
+                <span class="nav-icon">💻</span>
+                <span class="nav-text">معلومات النظام</span>
+              </li>
+              <li class="nav-item" data-page="processes">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text">مدير العمليات</span>
+              </li>
+              <li class="nav-item" data-page="services">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-text">مدير الخدمات</span>
+              </li>
+              <li class="nav-item" data-page="drivers">
+                <span class="nav-icon">🔧</span>
+                <span class="nav-text">التعريفات</span>
+              </li>
+              <li class="nav-item" data-page="power">
+                <span class="nav-icon">🔋</span>
+                <span class="nav-text">خطط الطاقة</span>
+              </li>
+              <li class="nav-item" data-page="startup">
+                <span class="nav-icon">🚀</span>
+                <span class="nav-text">بدء التشغيل</span>
+              </li>
+              <li class="nav-item" data-page="ram">
+                <span class="nav-icon">💾</span>
+                <span class="nav-text">تحسين RAM</span>
+              </li>
+              <li class="nav-item" data-page="clean">
+                <span class="nav-icon">🧹</span>
+                <span class="nav-text">تنظيف النظام</span>
+              </li>
+              <li class="nav-item" data-page="winrepair">
+                <span class="nav-icon">🩹</span>
+                <span class="nav-text">إصلاح الويندوز</span>
+              </li>
+              <li class="nav-item" data-page="restore">
+                <span class="nav-icon">⏮️</span>
+                <span class="nav-text">نقاط الاستعادة</span>
+              </li>
+              <li class="nav-item" data-page="bsod">
+                <span class="nav-icon">💀</span>
+                <span class="nav-text">محلل BSOD</span>
+              </li>
+              <li class="nav-item" data-page="winupdate">
+                <span class="nav-icon">🔒</span>
+                <span class="nav-text">منع تحديثات Windows</span>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <div class="nav-section" onclick="toggleNavSection(this)">
+              <span>💿 التخزين</span>
+              <span class="nav-arrow">▾</span>
+            </div>
+            <ul class="nav-items-group">
+              <li class="nav-item" data-page="disk">
+                <span class="nav-icon">💿</span>
+                <span class="nav-text">صحة القرص</span>
+              </li>
+              <li class="nav-item" data-page="diskanalyzer">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">تحليل المساحة</span>
+              </li>
+              <li class="nav-item" data-page="duplicates">
+                <span class="nav-icon">📑</span>
+                <span class="nav-text">ملفات مكررة</span>
+              </li>
+              <li class="nav-item" data-page="uninstall">
+                <span class="nav-icon">🗑️</span>
+                <span class="nav-text">إزالة البرامج</span>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <div class="nav-section" onclick="toggleNavSection(this)">
+              <span>🛠️ أدوات إضافية</span>
+              <span class="nav-arrow">▾</span>
+            </div>
+            <ul class="nav-items-group">
+              <li class="nav-item" data-page="benchmark">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">مقارنة المعالج</span>
+              </li>
+              <li class="nav-item" data-page="ctxmenu">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text">قائمة كليك يمين</span>
+              </li>
+              <li class="nav-item" data-page="browsrclean">
+                <span class="nav-icon">🌐</span>
+                <span class="nav-text">تنظيف المتصفحات</span>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <div class="sidebar-footer">
+          <button class="btn-optimize-all" id="optimizeAll">
+            ⚡ تحسين الكل
+          </button>
+          <div class="sidebar-branding">
+            <div class="branding-line"></div>
+            <div class="branding-logo">JA7EM</div>
+            <div class="branding-tagline">OPTIMIZER</div>
+            <div class="branding-copy">© 2026 JA7EM. جميع الحقوق محفوظة.</div>
+          </div>
+        </div>
+      </nav>
+
+      <main class="main-content">
+
+        <!-- DASHBOARD -->
+        <div class="page active" id="page-dashboard">
+          <div class="dashboard-hero">
+            <div class="dashboard-hero-bg"></div>
+            <div class="dashboard-hero-content">
+              <div class="dashboard-hero-badge">⚡ PC OPTIMIZER</div>
+              <h1 class="dashboard-hero-title">
+                <span class="hero-brand">JA7EM</span> Optimizer
+              </h1>
+              <p class="dashboard-hero-sub">حسّن أداء جهازك، أصلح الأخطاء، واحصل على تجربة لعب سلسة</p>
+              <div class="dashboard-hero-stats">
+                <div class="hero-stat">
+                  <div class="hero-stat-value" id="heroCpu">--%</div>
+                  <div class="hero-stat-label">المعالج</div>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                  <div class="hero-stat-value" id="heroRam">--%</div>
+                  <div class="hero-stat-label">الذاكرة</div>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                  <div class="hero-stat-value" id="heroDisk">--%</div>
+                  <div class="hero-stat-label">القرص</div>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                  <div class="hero-stat-value hero-stat-os" id="heroOs">Windows</div>
+                  <div class="hero-stat-label">النظام</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="stats-grid" id="systemStats">
+          <div id="dashboard-license-info" style="background:rgba(124,58,237,0.12); border:1px solid rgba(124,58,237,0.25); border-radius:14px; padding:18px 24px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:14px;">
+              <div style="width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg, #7c3aed, #06b6d4); display:flex; align-items:center; justify-content:center; font-size:20px;">&#128273;</div>
+              <div>
+                <div style="color:#ccc; font-size:0.85em;">License</div>
+                <div id="dashLicenseKey" style="font-family:monospace; color:#00ff88; font-size:1.05em;">N/A</div>
+              </div>
+            </div>
+            <div style="text-align:center;">
+              <div style="color:#888; font-size:0.8em;">Type</div>
+              <div id="dashLicenseType" style="color:#ddd; font-size:0.95em;">N/A</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="color:#888; font-size:0.8em;">Time Remaining</div>
+              <div id="dashLicenseCountdown" style="font-size:1.3em; font-weight:bold; background:linear-gradient(135deg, #7c3aed, #00d4ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">N/A</div>
+              <div id="dashLicenseExpiry" style="color:#666; font-size:0.75em;"></div>
+            </div>
+          </div>
+          <div class="quick-actions">
+            <h2>⚡ إجراءات سريعة</h2>
+            <div class="action-buttons action-buttons-4">
+              <button class="action-btn action-btn-purple" onclick="fixStutter()">
+                <span class="action-icon">⚡</span>
+                <span class="action-text">إصلاح الفريمات</span>
+              </button>
+              <button class="action-btn action-btn-cyan" onclick="applyQuickBoost()">
+                <span class="action-icon">🚀</span>
+                <span class="action-text">تحسين سريع</span>
+              </button>
+              <button class="action-btn action-btn-pink" onclick="quickClean()">
+                <span class="action-icon">✨</span>
+                <span class="action-text">تنظيف سريع</span>
+              </button>
+              <button class="action-btn action-btn-green" onclick="createBackup()">
+                <span class="action-icon">💾</span>
+                <span class="action-text">نسخة احتياطية</span>
+              </button>
+            </div>
+            <div class="action-buttons action-buttons-4" style="margin-top:14px;">
+              <button class="action-btn action-btn-orange" onclick="navigateTo('gamemode')">
+                <span class="action-icon">🎯</span>
+                <span class="action-text">وضع الألعاب</span>
+              </button>
+              <button class="action-btn action-btn-blue" onclick="navigateTo('monitor')">
+                <span class="action-icon">📊</span>
+                <span class="action-text">مراقبة النظام</span>
+              </button>
+              <button class="action-btn action-btn-red" onclick="navigateTo('winrepair')">
+                <span class="action-icon">🩹</span>
+                <span class="action-text">إصلاح الويندوز</span>
+              </button>
+              <button class="action-btn action-btn-teal" onclick="navigateTo('netrepair')">
+                <span class="action-icon">🌐</span>
+                <span class="action-text">إصلاح الإنترنت</span>
+              </button>
+            </div>
+            <div class="action-buttons action-buttons-4" style="margin-top:14px;">
+              <button class="action-btn action-btn-lime" onclick="navigateTo('ram')">
+                <span class="action-icon">💾</span>
+                <span class="action-text">تحسين RAM</span>
+              </button>
+              <button class="action-btn action-btn-indigo" onclick="navigateTo('diskanalyzer')">
+                <span class="action-icon">📊</span>
+                <span class="action-text">تحليل المساحة</span>
+              </button>
+              <button class="action-btn action-btn-amber" onclick="navigateTo('uninstall')">
+                <span class="action-icon">🗑️</span>
+                <span class="action-text">إزالة البرامج</span>
+              </button>
+              <button class="action-btn action-btn-rose" onclick="navigateTo('benchmark')">
+                <span class="action-icon">📊</span>
+                <span class="action-text">مقارنة المعالج</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- DISCORD SECTION -->
+          <div class="discord-section">
+            <div class="discord-section-title">
+              <span class="discord-section-icon">💬</span>
+              <span class="team-cj-title">TEAM CJ</span>
+              <span class="discord-rpc-badge" id="rpcBadge">غير متصل</span>
+            </div>
+            <div class="discord-profiles">
+              <div class="discord-card">
+                <div class="discord-bg"></div>
+                <div class="discord-content">
+                  <div class="discord-left">
+                    <div class="discord-avatar">
+                      <div class="discord-avatar-ring"></div>
+                      <div class="discord-avatar-letter">
+                        <img src="discord-avatar.png" alt="ja7em_" class="discord-avatar-img">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="discord-right">
+                    <div class="discord-badge">JA7EM</div>
+                    <div class="discord-name">ja7em_</div>
+                    <div class="discord-status">
+                      <span class="discord-status-dot"></span>
+                      مطور
+                    </div>
+                    <div class="discord-activity" id="discordActivity">
+                      <span class="activity-icon">▶</span>
+                      <span class="activity-text">JA7EM OPTIMIZER v1.0.0</span>
+                      <span class="activity-status" id="rpcIndicator"></span>
+                    </div>
+                    <p class="discord-desc">مختص بتطوير البرامج وصفحات الويب وبوتات الديسكورد</p>
+                    <label class="activity-toggle">
+                      <input type="checkbox" id="activityToggle" checked onchange="toggleActivity()">
+                      <span class="activity-toggle-track"></span>
+                      <span class="activity-toggle-label">إظهار في ديسكورد</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="discord-card">
+                <div class="discord-bg"></div>
+                <div class="discord-content">
+                  <div class="discord-left">
+                    <div class="discord-avatar">
+                      <div class="discord-avatar-ring"></div>
+                      <div class="discord-avatar-letter">
+                        <img src="caza-avatar.png" alt="Caza" class="discord-avatar-img">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="discord-right">
+                    <div class="discord-badge">CAZA</div>
+                    <div class="discord-name">caza</div>
+                    <div class="discord-status">
+                      <span class="discord-status-dot"></span>
+                      مطور - Designer
+                    </div>
+                    <p class="discord-desc">مختص بتطوير البوتات و Designer</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+           <div class="dashboard-footer">
+            <div class="footer-line"></div>
+            <div class="footer-brand">JA7EM OPTIMIZER v1.0.0</div>
+            <div class="footer-copy">© 2026 JA7EM — صُنع بـ ❤️ لأفضل تجربة ألعاب</div>
+          </div>
+          </div>
+        </div>
+
+        <!-- STUTTER FIX -->
+        <div class="page" id="page-stutter">
+          <div class="page-header">
+            <h1>⚡ إصلاح مشاكل الفريمات</h1>
+            <p>حلول حقيقية لمشاكل التقطع والـ Stuttering — يغير فرق ملموس</p>
+          </div>
+          <div class="stutter-hero">
+            <div class="hero-card">
+              <div class="hero-icon">🚀</div>
+              <h3>إصلاح شامل لمشاكل الأداء</h3>
+              <p>هذا الإصلاح يغير 12 إعداد بالجهاز يؤثر بشكل مباشر على الفريمات والتقطع. كل تعديل آمن وقابل لإعادة التعيين.</p>
+              <button class="btn-hero" onclick="applyFullStutterFix()">
+                ⚡ تطبيق الإصلاح الشامل
+              </button>
+            </div>
+          </div>
+          <div class="stutter-grid" id="stutterFixes">
+          </div>
+          <div class="boost-actions">
+            <button class="btn-secondary" onclick="revertStutterFix()">
+              <span>↩️</span> إعادة التعيين
+            </button>
+          </div>
+        </div>
+
+        <!-- FPS BOOST -->
+        <div class="page" id="page-fps">
+          <div class="page-header">
+            <h1>🚀 تحسين FPS</h1>
+            <p>تحسين أداء الألعاب + تعطيل المؤثرات البصرية — تغييرات حقيقية</p>
+          </div>
+          <h2 style="font-size:16px;margin-bottom:12px;color:var(--text-secondary);">⚙️ تحسينات النظام</h2>
+          <div class="tweaks-grid" id="fpsTweaks">
+            <div class="tweak-card">
+              <label class="tweak-toggle">
+                <input type="checkbox" checked data-tweak="disableGameDVR">
+                <span class="toggle-slider"></span>
+              </label>
+              <div class="tweak-info">
+                <div class="tweak-name">تعطيل Game DVR</div>
+                <div class="tweak-desc">إزالة تسجيل Xbox</div>
+              </div>
+            </div>
+            <div class="tweak-card">
+              <label class="tweak-toggle">
+                <input type="checkbox" checked data-tweak="enableHAGS">
+                <span class="toggle-slider"></span>
+              </label>
+              <div class="tweak-info">
+                <div class="tweak-name">تفعيل HAGS</div>
+                <div class="tweak-desc">جدولة GPU متسارعة</div>
+              </div>
+            </div>
+            <div class="tweak-card">
+              <label class="tweak-toggle">
+                <input type="checkbox" checked data-tweak="disableNetworkThrottling">
+                <span class="toggle-slider"></span>
+              </label>
+              <div class="tweak-info">
+                <div class="tweak-name">تعطيل Network Throttling</div>
+                <div class="tweak-desc">تحسين سرعة الشبكة</div>
+              </div>
+            </div>
+            <div class="tweak-card">
+              <label class="tweak-toggle">
+                <input type="checkbox" checked data-tweak="systemResponsiveness">
+                <span class="toggle-slider"></span>
+              </label>
+              <div class="tweak-info">
+                <div class="tweak-name">تحسين استجابة النظام</div>
+                <div class="tweak-desc">أولوية الألعاب</div>
+              </div>
+            </div>
+            <div class="tweak-card">
+              <label class="tweak-toggle">
+                <input type="checkbox" checked data-tweak="disableMouseAccel">
+                <span class="toggle-slider"></span>
+              </label>
+              <div class="tweak-info">
+                <div class="tweak-name">تعطيل تسريع الماوس</div>
+                <div class="tweak-desc">إدخال خام بدون تسريع</div>
+              </div>
+            </div>
+            <div class="tweak-card">
+              <label class="tweak-toggle">
+                <input type="checkbox" checked data-tweak="disablePowerThrottling">
+                <span class="toggle-slider"></span>
+              </label>
+              <div class="tweak-info">
+                <div class="tweak-name">تعطيل تقييد الطاقة</div>
+                <div class="tweak-desc">أداء CPU كامل</div>
+              </div>
+            </div>
+          </div>
+          <div class="boost-actions" style="margin-bottom:24px;">
+            <button class="btn-primary" onclick="applyFpsBoost()">
+              <span>🚀</span> تطبيق التحسينات
+            </button>
+            <button class="btn-secondary" onclick="revertFpsBoost()">
+              <span>↩️</span> إعادة التعيين
+            </button>
+          </div>
+
+          <h2 style="font-size:16px;margin-bottom:12px;color:var(--text-secondary);">🎨 تعطيل المؤثرات البصرية</h2>
+          <p style="color:var(--text-secondary);font-size:13px;margin-bottom:14px;">تعطيل تأثيرات الويندوز (الشفافية، الظلال، الرسوم المتحركة) لتخفيف الحمل على المعالج وكرت الشاشة</p>
+          <div style="display:flex;gap:10px;margin-bottom:16px;">
+            <button class="btn-primary" onclick="applyAllVisualTweaks()" style="background:linear-gradient(135deg,#7c3aed,#2563eb);">🚀 تعطيل الكل</button>
+            <button class="btn-secondary" onclick="revertAllVisualTweaks()" style="border-color:#ef4444;color:#ef4444;">↩️ إعادة</button>
+          </div>
+          <div class="tweaks-grid" id="visualTweaksList">
+            <div class="empty-state" style="padding:16px;"><div class="empty-icon">🎨</div><p>اضغط "تعطيل الكل" لإيقاف المؤثرات البصرية</p></div>
+          </div>
+        </div>
+
+        <!-- GAME SETTINGS -->
+        <div class="page" id="page-games">
+          <div class="page-header">
+            <h1>🎯 تعديل إعدادات الألعاب</h1>
+            <p>اختر الوضع وينطبق تلقائياً على النظام كله — تغييرات حقيقية في الريجستري والخدمات وخطط الطاقة</p>
+          </div>
+
+          <div class="info-card" style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:20px;">💡</span>
+            <span style="color:#c4b5fd;font-size:13px;">كل وضع يطبق تحسينات حقيقية على النظام (ريجستري، خدمات، طاقة) + تعديل ملفات إعدادات اللعبة إن وجدت. التغييرات حقيقية وملموسة!</span>
+          </div>
+
+          <div class="games-presets">
+            <h2>اختر الوضع</h2>
+            <div class="preset-cards">
+              <div class="preset-card" onclick="selectPreset('performance')" id="preset-performance">
+                <div class="preset-icon">🔥</div>
+                <div class="preset-name">أقصى أداء</div>
+                <div class="preset-desc">تعطيل DVR + HAGS + أولوية المعالج + خدمات الخلفية + خطة طاقة أداء عالي + تعطيل تقييد الطاقة</div>
+              </div>
+              <div class="preset-card selected" onclick="selectPreset('balanced')" id="preset-balanced">
+                <div class="preset-icon">⚖️</div>
+                <div class="preset-name">متوازن</div>
+                <div class="preset-desc">تحسينات متوسطة — توازن بين الأداء وجودة النظام</div>
+              </div>
+              <div class="preset-card" onclick="selectPreset('competitive')" id="preset-competitive">
+                <div class="preset-icon">🎯</div>
+                <div class="preset-name">تنافسي</div>
+                <div class="preset-desc">كل تحسينات الأداء + تعطيل الماوس أكسلريشن + BCDEdit تيك + أولوية عالية للجميع</div>
+              </div>
+              <div class="preset-card" onclick="selectPreset('quality')" id="preset-quality">
+                <div class="preset-icon">✨</div>
+                <div class="preset-name">أقصى جودة</div>
+                <div class="preset-desc">أقل تدخل في النظام — الجودة أولاً</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="games-scan">
+            <button class="btn-primary" onclick="scanGames()">
+              <span>🔍</span> بحث عن الألعاب المثبتة
+            </button>
+            <button class="btn-secondary" onclick="addGameManually()">
+              <span>➕</span> إضافة لعبة يدوياً
+            </button>
+            <button class="btn-danger" onclick="resetAllGameTweaks()" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:10px 20px;color:#ef4444;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;font-size:13px;">
+              <span>⚠️</span> إعادة كل شيء للوضع الأصلي
+            </button>
+          </div>
+
+          <div class="repair-progress" id="gamesProgress" style="display:none;">
+            <h3 style="font-size:13px; margin-bottom:10px; color:var(--text-secondary);">جاري التطبيق...</h3>
+            <div class="progress-bar"><div class="progress-fill" id="gamesFill" style="width:0%"></div></div>
+            <div class="progress-text" id="gamesText">جاري...</div>
+          </div>
+
+          <div class="repair-results" id="gamesResults"></div>
+
+          <div class="games-list" id="gamesList">
+            <div class="empty-state">
+              <div class="empty-icon">🎮</div>
+              <p>اضغط "بحث" لاكتشاف الألعاب المثبتة على جهازك</p>
+            </div>
+          </div>
+
+          <h2 style="font-size:16px;margin-top:28px;margin-bottom:12px;color:var(--text-secondary);">📋 بروفايلات FPS المخصصة</h2>
+          <p style="color:var(--text-secondary);font-size:13px;margin-bottom:14px;">احفظ إعداداتك المفضلة كبروفايل واستخدمها لأي لعبة — تقدر تسوي بروفايل لكل لعبة</p>
+          <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+            <button class="btn-primary" onclick="saveCurrentAsProfile()" style="background:linear-gradient(135deg,#7c3aed,#2563eb);">💾 حفظ الحالي كبروفايل</button>
+            <button class="btn-secondary" onclick="loadProfilesList()" style="border-color:#06b6d4;color:#06b6d4;">🔄 تحديث البروفايلات</button>
+            <button class="btn-hero" onclick="resetProfilesToDefault()" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:Cairo,sans-serif;font-size:12px;">↩️ إعادة الافتراضي</button>
+          </div>
+          <div class="tweaks-grid" id="fpsProfilesList" style="margin-bottom:20px;">
+            <div class="empty-state"><div class="empty-icon">📋</div><p>لا توجد بروفايلات مخصصة</p></div>
+          </div>
+        </div>
+
+        <!-- DRIVERS -->
+        <div class="page" id="page-drivers">
+          <div class="page-header">
+            <h1>تحديث التعريفات</h1>
+            <p>تحديث وتحديث تعريفات الأجهزة</p>
+          </div>
+          <div class="drivers-actions">
+            <button class="btn-primary" onclick="loadDrivers()">
+              <span>🔍</span> بحث عن التعريفات
+            </button>
+          </div>
+          <div class="drivers-list" id="driversList">
+            <div class="empty-state">
+              <div class="empty-icon">🔧</div>
+              <p>اضغط "بحث" لاكتشاف التعريفات</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CLEAN -->
+        <div class="page" id="page-clean">
+          <div class="page-header">
+            <h1>🧹 تنظيف النظام</h1>
+            <p>حذف الملفات الزائدة + إزالة برامج bloatware + تحسين الأداء</p>
+          </div>
+          <div class="clean-options">
+            <div class="clean-card">
+              <div class="clean-icon">📁</div>
+              <div class="clean-info">
+                <div class="clean-name">الملفات المؤقتة</div>
+                <div class="clean-desc">حذف ملفات Temp والمؤقتة</div>
+              </div>
+              <button class="btn-clean" onclick="cleanTemp()">تنظيف</button>
+            </div>
+            <div class="clean-card">
+              <div class="clean-icon">🌐</div>
+              <div class="clean-info">
+                <div class="clean-name">DNS Cache</div>
+                <div class="clean-desc">تفريغ ذاكرة DNS</div>
+              </div>
+              <button class="btn-clean" onclick="cleanDNS()">تنظيف</button>
+            </div>
+            <div class="clean-card">
+              <div class="clean-icon">💾</div>
+              <div class="clean-info">
+                <div class="clean-name">نسخة احتياطية</div>
+                <div class="clean-desc">إنشاء نقطة استعادة</div>
+              </div>
+              <button class="btn-backup" onclick="createBackup()">إنشاء</button>
+            </div>
+          </div>
+          <div class="clean-actions">
+            <button class="btn-primary" onclick="cleanAll()">
+              <span>🧹</span> تنظيف شامل
+            </button>
+          </div>
+
+          <h2 style="font-size:18px; margin:28px 0 16px; color:var(--text-primary);">🗑️ إزالة برامج Bloatware</h2>
+          <p style="color:var(--text-secondary); font-size:13px; margin-bottom:14px;">إزالة تطبيقات Windows الافتراضية اللي ماتستخدمها (Candy Crush، Xbox، Teams، Skype، وغيرهم)</p>
+          <div class="clean-actions" style="margin-bottom:16px;">
+            <button class="btn-primary" onclick="loadBloatware()" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+              <span>🔍</span> فحص برامج bloatware
+            </button>
+            <button class="btn-secondary" onclick="uninstallAllBloatware()" style="border-color:#ef4444;color:#ef4444;">
+              <span>🗑️</span> إزالة الكل
+            </button>
+          </div>
+          <div class="clean-options" id="bloatwareList" style="margin-top:12px;">
+            <div class="empty-state" style="padding:20px;">
+              <div class="empty-icon">🔍</div>
+              <p>اضغط "فحص" لاكتشاف برامج bloatware المثبتة</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MONITOR -->
+        <div class="page" id="page-monitor">
+          <div class="page-header">
+            <h1>📊 مراقبة النظام</h1>
+            <p>مراقبة أداء المكونات في الوقت الفعلي</p>
+          </div>
+          <div class="monitor-live">
+            <div class="monitor-grid">
+              <div class="monitor-card">
+                <div class="monitor-header">
+                  <span class="monitor-icon">💻</span>
+                  <span class="monitor-title">المعالج (CPU)</span>
+                </div>
+                <div class="monitor-bar">
+                  <div class="monitor-fill" id="cpuBar" style="width: 0%"></div>
+                </div>
+                <div class="monitor-value" id="cpuValue">0%</div>
+              </div>
+              <div class="monitor-card">
+                <div class="monitor-header">
+                  <span class="monitor-icon">🧠</span>
+                  <span class="monitor-title">الذاكرة (RAM)</span>
+                </div>
+                <div class="monitor-bar">
+                  <div class="monitor-fill" id="memBar" style="width: 0%"></div>
+                </div>
+                <div class="monitor-value" id="memValue">0%</div>
+              </div>
+              <div class="monitor-card">
+                <div class="monitor-header">
+                  <span class="monitor-icon">💾</span>
+                  <span class="monitor-title">القرص (Disk)</span>
+                </div>
+                <div class="monitor-bar">
+                  <div class="monitor-fill" id="diskBar" style="width: 0%"></div>
+                </div>
+                <div class="monitor-value" id="diskValue">0%</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="system-details">
+            <h2>معلومات النظام الكاملة</h2>
+            <div class="details-grid">
+              <div class="detail-card">
+                <div class="detail-icon">🖥️</div>
+                <div class="detail-content">
+                  <div class="detail-label">اسم الجهاز</div>
+                  <div class="detail-value" id="sys-hostname">جاري التحميل...</div>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-icon">📀</div>
+                <div class="detail-content">
+                  <div class="detail-label">نظام التشغيل</div>
+                  <div class="detail-value" id="sys-platform">جاري التحميل...</div>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-icon">🏗️</div>
+                <div class="detail-content">
+                  <div class="detail-label">البنية</div>
+                  <div class="detail-value" id="sys-arch">جاري التحميل...</div>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-icon">⚙️</div>
+                <div class="detail-content">
+                  <div class="detail-label">المعالج</div>
+                  <div class="detail-value" id="sys-cpu-model">جاري التحميل...</div>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-icon">🔢</div>
+                <div class="detail-content">
+                  <div class="detail-label">عدد النوى</div>
+                  <div class="detail-value" id="sys-cpu-cores">جاري التحميل...</div>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-icon">⚡</div>
+                <div class="detail-content">
+                  <div class="detail-label">سرعة المعالج</div>
+                  <div class="detail-value" id="sys-cpu-speed">جاري التحميل...</div>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-icon">🧠</div>
+                <div class="detail-content">
+                  <div class="detail-label">الذاكرة الكلية</div>
+                  <div class="detail-value" id="sys-mem-total">جاري التحميل...</div>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-icon">📉</div>
+                <div class="detail-content">
+                  <div class="detail-label">الذاكرة المستخدمة</div>
+                  <div class="detail-value" id="sys-mem-used">جاري التحميل...</div>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-icon">📊</div>
+                <div class="detail-content">
+                  <div class="detail-label">نسبة استخدام الذاكرة</div>
+                  <div class="detail-value" id="sys-mem-pct">جاري التحميل...</div>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-icon">🎮</div>
+                <div class="detail-content">
+                  <div class="detail-label">كرت الشاشة</div>
+                  <div class="detail-value" id="sys-gpu">جاري التحميل...</div>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-icon">⏱️</div>
+                <div class="detail-content">
+                  <div class="detail-label">مدة تشغيل النظام</div>
+                  <div class="detail-value" id="sys-uptime">جاري التحميل...</div>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-icon">📡</div>
+                <div class="detail-content">
+                  <div class="detail-label">الذاكرة المستخدمة (Live)</div>
+                  <div class="detail-value" id="sys-mem-live">جاري التحميل...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRANSLATE -->
+        <div class="page" id="page-translate">
+          <div class="page-header">
+            <h1>ترجمة الألعاب</h1>
+            <p>ترجمة نصوص الألعاب من الإنجليزية إلى العربية</p>
+          </div>
+          <div class="translate-container">
+            <div class="translate-input-section">
+              <h3>النص الإنجليزي</h3>
+              <textarea id="translateInput" placeholder="أدخل النص الإنجليزي للترجمة..." rows="6"></textarea>
+            </div>
+            <div class="translate-actions">
+              <button class="btn-primary" onclick="translateText()">
+                <span>🔄</span> ترجمة
+              </button>
+              <select id="translateFrom">
+                <option value="en">الإنجليزية</option>
+                <option value="ja">اليابانية</option>
+                <option value="ko">الكورية</option>
+                <option value="zh">الصينية</option>
+              </select>
+              <span class="translate-arrow">→</span>
+              <select id="translateTo">
+                <option value="ar">العربية</option>
+              </select>
+            </div>
+            <div class="translate-output-section">
+              <h3>الترجمة العربية</h3>
+              <textarea id="translateOutput" placeholder="ستظهر الترجمة هنا..." rows="6" readonly></textarea>
+            </div>
+            <div class="translate-history">
+              <h3>سجل الترجمات</h3>
+              <div id="translateHistory" class="history-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WINDOWS REPAIR -->
+        <div class="page" id="page-winrepair">
+          <div class="page-header">
+            <h1>إصلاح الويندوز</h1>
+            <p>إصلاح مشاكل النظام والملفات التالفة وتحسين استقرار الويندوز</p>
+          </div>
+          <div class="repair-hero">
+            <div class="repair-card windows-repair">
+              <div class="repair-icon">🩹</div>
+              <h3>إصلاح شامل للويندوز</h3>
+              <p>اختر نوع الإصلاح المناسب لمشكلتك — أداة سهلة وسريعة لحل مشاكل النظام</p>
+              <div class="repair-options" id="winRepairOptions">
+                <div class="repair-option" onclick="runWinRepair('sfc')">
+                  <div class="repair-option-icon">🔍</div>
+                  <div class="repair-option-name">فحص ملفات النظام</div>
+                  <div class="repair-option-desc">SFC — استعادة الملفات التالفة</div>
+                </div>
+                <div class="repair-option" onclick="runWinRepair('dism')">
+                  <div class="repair-option-icon">📦</div>
+                  <div class="repair-option-name">إصلاح صورة النظام</div>
+                  <div class="repair-option-desc">DISM — تثبيت المكونات المفقودة</div>
+                </div>
+                <div class="repair-option" onclick="runWinRepair('registry')">
+                  <div class="repair-option-icon">⚙️</div>
+                  <div class="repair-option-name">إصلاح السجل</div>
+                  <div class="repair-option-desc">تنظيف وإصلاح_REGISTRY</div>
+                </div>
+                <div class="repair-option" onclick="runWinRepair('dll')">
+                  <div class="repair-option-icon">📚</div>
+                  <div class="repair-option-name">إصلاح DLL</div>
+                  <div class="repair-option-desc">إعادة تسجيل ملفات DLL</div>
+                </div>
+                <div class="repair-option" onclick="runWinRepair('windowsUpdate')">
+                  <div class="repair-option-icon">🔄</div>
+                  <div class="repair-option-name">إصلاح Windows Update</div>
+                  <div class="repair-option-desc">حل مشاكل التحديث</div>
+                </div>
+                <div class="repair-option" onclick="runWinRepair('all')">
+                  <div class="repair-option-icon">🛠️</div>
+                  <div class="repair-option-name">إصلاح شامل</div>
+                  <div class="repair-option-desc">تشغيل جميع عمليات الإصلاح</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="repair-progress" id="winRepairProgress">
+            <h3 style="font-size:13px; margin-bottom:10px; color:var(--text-secondary);">جاري الإصلاح...</h3>
+            <div class="progress-bar"><div class="progress-fill" id="winRepairFill"></div></div>
+            <div class="progress-text" id="winRepairText">جاري التحضير...</div>
+          </div>
+          <div class="repair-results" id="winRepairResults"></div>
+        </div>
+
+        <!-- INTERNET REPAIR -->
+        <div class="page" id="page-netrepair">
+          <div class="page-header">
+            <h1>إصلاح الإنترنت</h1>
+            <p>حل مشاكل الاتصال بالإنترنت وتحسين سرعة الشبكة</p>
+          </div>
+          <div class="repair-hero">
+            <div class="repair-card internet-repair">
+              <div class="repair-icon">🌐</div>
+              <h3>إصلاح شامل للإنترنت</h3>
+              <p>اختر نوع الإصلاح — من إعادة ضبط الشبكة إلى تحسين السرعة</p>
+              <div class="repair-options" id="netRepairOptions">
+                <div class="repair-option" onclick="runNetRepair('tcpip')">
+                  <div class="repair-option-icon">🔗</div>
+                  <div class="repair-option-name">إعادة ضبط TCP/IP</div>
+                  <div class="repair-option-desc">إعادة تكوين بروتوكول الإنترنت</div>
+                </div>
+                <div class="repair-option" onclick="runNetRepair('winsock')">
+                  <div class="repair-option-icon">🔌</div>
+                  <div class="repair-option-name">إصلاح Winsock</div>
+                  <div class="repair-option-desc">إصلاح مكتبة الاتصالات</div>
+                </div>
+                <div class="repair-option" onclick="runNetRepair('dns')">
+                  <div class="repair-option-icon">📡</div>
+                  <div class="repair-option-name">إصلاح DNS</div>
+                  <div class="repair-option-desc">مسح كاش DNS وتغيير السيرفر</div>
+                </div>
+                <div class="repair-option" onclick="runNetRepair('adapters')">
+                  <div class="repair-option-icon">🖥️</div>
+                  <div class="repair-option-name">إصلاح محولات الشبكة</div>
+                  <div class="repair-option-desc">إعادة ضبط كروت الشبكة</div>
+                </div>
+                <div class="repair-option" onclick="runNetRepair('firewall')">
+                  <div class="repair-option-icon">🛡️</div>
+                  <div class="repair-option-name">إصلاح جدار الحماية</div>
+                  <div class="repair-option-desc">إعادة تعيين قواعد الحماية</div>
+                </div>
+                <div class="repair-option" onclick="runNetRepair('slowInternet')">
+                  <div class="repair-option-icon">🚀</div>
+                  <div class="repair-option-name">تحسين سرعة الإنترنت</div>
+                  <div class="repair-option-desc">تسريع الاتصال وتقليل الباينق</div>
+                </div>
+                <div class="repair-option" onclick="runNetRepair('all')">
+                  <div class="repair-option-icon">🛠️</div>
+                  <div class="repair-option-name">إصلاح شامل</div>
+                  <div class="repair-option-desc">تشغيل جميع عمليات الإصلاح</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="repair-progress" id="netRepairProgress">
+            <h3 style="font-size:13px; margin-bottom:10px; color:var(--text-secondary);">جاري الإصلاح...</h3>
+            <div class="progress-bar"><div class="progress-fill" id="netRepairFill"></div></div>
+            <div class="progress-text" id="netRepairText">جاري التحضير...</div>
+          </div>
+          <div class="repair-results" id="netRepairResults"></div>
+        </div>
+
+        <!-- GAME MODE -->
+        <div class="page" id="page-gamemode">
+          <div class="page-header">
+            <h1>وضع الألعاب</h1>
+            <p>حول جهازك لوضع ألعاب بنقرة واحدة — أقصى أداء وأقل تداخل</p>
+          </div>
+          <div class="repair-hero">
+            <div class="repair-card" style="position:relative; overflow:hidden;">
+              <div style="position:absolute; inset:0; background:linear-gradient(135deg, rgba(236,72,153,0.08), rgba(124,58,237,0.08)); pointer-events:none;"></div>
+              <div class="repair-icon">🎮</div>
+              <h3 id="gameModeTitle">وضع الألعاب غير مفعّل</h3>
+              <p>يقوم بإغلاق برامج الخلفية غير الضرورية، تعطيل الخدمات الزائدة، ورفع أولوية المعالج لتحقيق أقصى أداء أثناء اللعب</p>
+              <button class="btn-hero" id="btnGameMode" onclick="toggleGameMode()">🚀 تفعيل وضع الألعاب</button>
+            </div>
+          </div>
+          <div class="game-mode-features" style="margin-bottom:20px;">
+            <h2 style="font-size:16px; margin-bottom:14px; color:var(--text-secondary);">ماذا يفعل وضع الألعاب؟</h2>
+            <div class="tweaks-grid">
+              <div class="tweak-card"><div class="tweak-name">إغلاق برامج الخلفية</div><div class="tweak-desc">اختر البرامج اللي تبي تقفلها أثناء اللعب</div></div>
+              <div class="tweak-card"><div class="tweak-name">تعطيل خدمات النظام</div><div class="tweak-desc">SysMain, WSearch والخدمات غير الضرورية</div></div>
+              <div class="tweak-card"><div class="tweak-name">رفع أولوية المعالج</div><div class="tweak-desc">جعل البرامج تعمل بأولوية أعلى</div></div>
+              <div class="tweak-card"><div class="tweak-name">تحسين خطط الطاقة</div><div class="tweak-desc">أقصى أداء للمعالج والكرت</div></div>
+            </div>
+          </div>
+          <div id="processSelectorSection" style="margin-bottom:20px; display:none;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+              <h2 style="font-size:16px; color:var(--text-secondary);">اختر البرامج اللي تبي تقفلها</h2>
+              <button onclick="selectAllProcesses()" style="background:rgba(124,58,237,0.2); border:1px solid rgba(124,58,237,0.4); color:#a78bfa; padding:6px 14px; border-radius:8px; cursor:pointer; font-family:Cairo,sans-serif; font-size:12px; font-weight:700;">تحديد الكل</button>
+            </div>
+            <div id="runningProcessesList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:10px;"></div>
+          </div>
+          <div class="repair-progress" id="gameModeProgress" style="display:none;">
+            <h3 style="font-size:13px; margin-bottom:10px; color:var(--text-secondary);">جاري التفعيل...</h3>
+            <div class="progress-bar"><div class="progress-fill" id="gameModeFill" style="width:0%"></div></div>
+            <div class="progress-text" id="gameModeText">جاري...</div>
+          </div>
+          <div class="repair-results" id="gameModeResults"></div>
+        </div>
+
+        <!-- WINDOWS UPDATE BLOCKER -->
+        <div class="page" id="page-winupdate">
+          <div class="page-header">
+            <h1>🔒 منع تحديثات Windows</h1>
+            <p>إيقاف تحديثات الويندوز وخدماتها ومنع استهلاك النت والخلفية أثناء اللعب</p>
+          </div>
+          <div class="repair-hero">
+            <div class="repair-card" style="position:relative; overflow:hidden;">
+              <div style="position:absolute; inset:0; background:linear-gradient(135deg, rgba(239,68,68,0.08), rgba(249,115,22,0.08)); pointer-events:none;"></div>
+              <div class="repair-icon">🔒</div>
+              <h3>التحكم بتحديثات Windows</h3>
+              <p>إيقاف تشغيل خدمات Windows Update + Update Orchestrator + Delivery Optimization + المهام المجدولة</p>
+              <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px;">
+                <button class="btn-hero" onclick="blockWinUpdates()" style="background:linear-gradient(135deg,#ef4444,#dc2626);border:none;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">🔒 إيقاف التحديثات</button>
+                <button class="btn-hero" onclick="unblockWinUpdates()" style="background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.3);color:#22c55e;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">✅ تفعيل التحديثات</button>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:20px;">
+            <h2 style="font-size:16px;margin-bottom:12px;color:var(--text-secondary);">📊 حالة الخدمات</h2>
+            <div id="winUpdateStatusList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:10px;">
+              <div class="loading">جاري فحص الحالة...</div>
+            </div>
+          </div>
+          <div class="repair-results" id="winUpdateResults" style="margin-top:16px;"></div>
+        </div>
+
+        <!-- RAM OPTIMIZER -->
+        <div class="page" id="page-ram">
+          <div class="page-header">
+            <h1>💾 تحسين RAM</h1>
+            <p>تنظيف الذاكرة + تشغيل التنظيف التلقائي للـ Standby Memory</p>
+          </div>
+          <div class="stats-grid" id="ramStats">
+            <div class="stat-card"><div class="stat-icon">💾</div><div class="stat-info"><div class="stat-label">الذاكرة الكلية</div><div class="stat-value" id="ramTotal">--</div></div></div>
+            <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-info"><div class="stat-label">المستخدم</div><div class="stat-value" id="ramUsed">--</div></div></div>
+            <div class="stat-card"><div class="stat-icon">📉</div><div class="stat-info"><div class="stat-label">المتاح</div><div class="stat-value" id="ramFree">--</div></div></div>
+            <div class="stat-card"><div class="stat-icon">⚡</div><div class="stat-info"><div class="stat-label">النسبة</div><div class="stat-value" id="ramPercent">--</div></div></div>
+          </div>
+          <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+            <button class="btn-primary" onclick="cleanRam()">🧹 تنظيف يدوي</button>
+            <button class="btn-hero" id="btnStartAutoClean" onclick="startAutoRamClean()" style="background:linear-gradient(135deg,#06b6d4,#2563eb);border:none;color:#fff;padding:10px 20px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">🔄 تشغيل التنظيف التلقائي</button>
+            <button class="btn-hero" id="btnStopAutoClean" onclick="stopAutoRamClean()" style="display:none;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:10px 20px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">⏹️ إيقاف التلقائي</button>
+            <select id="autoCleanInterval" style="padding:7px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(0,200,255,0.15);border-radius:8px;color:#e8e8ff;font-size:12px;">
+              <option value="15000">15 ثانية</option>
+              <option value="30000" selected>30 ثانية</option>
+              <option value="60000">دقيقة</option>
+              <option value="300000">5 دقائق</option>
+            </select>
+          </div>
+          <div style="margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+            <span id="autoCleanStatus" style="font-size:13px;color:var(--text-secondary);">التنظيف التلقائي: متوقف</span>
+          </div>
+          <div class="repair-progress" id="ramProgress" style="display:none;">
+            <h3 style="font-size:13px; margin-bottom:10px; color:var(--text-secondary);">جاري التنظيف...</h3>
+            <div class="progress-bar"><div class="progress-fill" id="ramFill" style="width:0%"></div></div>
+            <div class="progress-text" id="ramText">جاري...</div>
+          </div>
+          <div class="repair-results" id="ramResults"></div>
+        </div>
+
+        <!-- DISK HEALTH -->
+        <div class="page" id="page-disk">
+          <div class="page-header">
+            <h1>💿 صحة القرص و SSD</h1>
+            <p>فحص حالة الأقراص + تحسين SSD لأقصى أداء</p>
+          </div>
+          <div style="margin-bottom:20px;">
+            <button class="btn-primary" onclick="loadDiskHealth()">🔄 تحديث البيانات</button>
+          </div>
+          <div class="stats-grid" id="diskUsageGrid"></div>
+          <h2 style="font-size:16px; margin:20px 0 14px; color:var(--text-secondary);">الحالة الصحية</h2>
+          <div class="drivers-list" id="diskHealthList">
+            <div class="loading">جاري تحميل بيانات الأقراص...</div>
+          </div>
+          <h2 style="font-size:16px; margin:20px 0 14px; color:var(--text-secondary);">فحص الأخطاء</h2>
+          <div style="margin-bottom:20px;">
+            <button class="btn-primary" onclick="checkDiskErrors()">🔍 فحص وإصلاح أخطاء القرص (C:)</button>
+          </div>
+          <div class="repair-results" id="diskResults"></div>
+
+          <h2 style="font-size:18px; margin:28px 0 14px; color:var(--text-primary);">⚡ تحسين SSD</h2>
+          <p style="color:var(--text-secondary);font-size:13px;margin-bottom:14px;">تعديلات لتحسين أداء SSD وتقليل عمليات الكتابة — مناسبة لجميع أقراص NVMe و SATA SSD</p>
+          <div style="display:flex;gap:10px;margin-bottom:16px;">
+            <button class="btn-primary" onclick="applyAllSsdTweaks()" style="background:linear-gradient(135deg,#06b6d4,#2563eb);">🚀 تطبيق الكل</button>
+            <button class="btn-secondary" onclick="revertAllSsdTweaks()" style="border-color:#ef4444;color:#ef4444;">↩️ إعادة</button>
+          </div>
+          <div class="tweaks-grid" id="ssdTweaksList">
+            <div class="empty-state" style="padding:16px;"><div class="empty-icon">💿</div><p>اضغط "تطبيق الكل" لتحسين SSD</p></div>
+          </div>
+        </div>
+
+        <!-- POWER PLANS -->
+        <div class="page" id="page-power">
+          <div class="page-header">
+            <h1>خطط الطاقة</h1>
+            <p>إدارة خطط الطاقة — اختيار أو إنشاء خطة مخصصة</p>
+          </div>
+          <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="btn-primary" onclick="createGamingPowerPlan()">🎮 إنشاء خطة ألعاب</button>
+            <button class="btn-secondary" onclick="createSaverPowerPlan()">🔋 خطة توفير الطاقة</button>
+            <button class="btn-secondary" onclick="loadPowerPlans()">🔄 تحديث</button>
+          </div>
+          <div class="drivers-list" id="powerPlansList">
+            <div class="loading">جاري تحميل خطط الطاقة...</div>
+          </div>
+        </div>
+
+        <!-- NETWORK OPTIMIZER -->
+        <div class="page" id="page-netoptimize">
+          <div class="page-header">
+            <h1>⚡ تحسين الشبكة للألعاب</h1>
+            <p>تحسين إعدادات الشبكة لتحقيق أقل تأخير وأقصى سرعة أثناء اللعب</p>
+          </div>
+          <div class="repair-hero">
+            <div class="repair-card" style="position:relative; overflow:hidden;">
+              <div style="position:absolute; inset:0; background:linear-gradient(135deg, rgba(6,182,212,0.08), rgba(124,58,237,0.08)); pointer-events:none;"></div>
+              <div class="repair-icon">⚡</div>
+              <h3>تحسين الشبكة للألعاب</h3>
+              <p>تحسين DNS + تعطيل Throttling + أولوية الألعاب + TCP Auto-Tuning — كلها مجانية</p>
+              <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px;">
+                <button class="btn-hero" id="btnApplyAllNet" onclick="applyAllNetworkOptimizations()">🚀 تطبيق الكل</button>
+                <button class="btn-hero" id="btnRevertNet" onclick="revertNetworkOptimizations()" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.3);">↩️ إعادة الافتراضي</button>
+              </div>
+            </div>
+          </div>
+          <div style="margin-bottom:20px;">
+            <h2 style="font-size:16px; margin-bottom:14px; color:var(--text-secondary);">التحسينات الأساسية</h2>
+            <div id="networkTweaksList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:12px;"></div>
+          </div>
+          <div class="repair-progress" id="netOptProgress" style="display:none;">
+            <h3 style="font-size:13px; margin-bottom:10px; color:var(--text-secondary);">جاري التحسين...</h3>
+            <div class="progress-bar"><div class="progress-fill" id="netOptFill" style="width:0%"></div></div>
+            <div class="progress-text" id="netOptText">جاري...</div>
+          </div>
+          <div class="repair-results" id="netOptResults"></div>
+        </div>
+
+        <!-- NETWORK TURBOBOOST -->
+        <div class="page" id="page-turboboost">
+          <div class="page-header">
+            <h1>🚀 Network Turboboost</h1>
+            <p>تعديلات متقدمة للشبكة — MTU + Nagle + TCP/IP + Fast Open</p>
+          </div>
+          <div class="repair-hero">
+            <div class="repair-card" style="position:relative; overflow:hidden;">
+              <div style="position:absolute; inset:0; background:linear-gradient(135deg, rgba(249,115,22,0.08), rgba(234,179,8,0.08)); pointer-events:none;"></div>
+              <div class="repair-icon">🚀</div>
+              <h3>Network Turboboost</h3>
+              <p>14 تعديل متقدم لتقليل Ping ورفع استقرار الشبكة للألعاب — Nagle, TCP NoDelay, RSS, Chimney, Fast Open وغيرها</p>
+              <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px;">
+                <button class="btn-hero" onclick="applyAllNetTurbo()" style="background:linear-gradient(135deg,#f97316,#eab308);border:none;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">🚀 تفعيل الكل</button>
+                <button class="btn-hero" onclick="revertAllNetTurbo()" style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">↩️ إعادة</button>
+              </div>
+            </div>
+          </div>
+          <h2 style="font-size:16px;margin:18px 0 12px;color:var(--text-secondary);">🔧 التعديلات</h2>
+          <div class="tweaks-grid" id="netTurboTweaksList">
+            <div class="empty-state" style="padding:16px;"><div class="empty-icon">🚀</div><p>اضغط تفعيل الكل لتحسين الشبكة</p></div>
+          </div>
+        </div>
+
+        <!-- STARTUP MANAGER -->
+        <div class="page" id="page-startup">
+          <div class="page-header">
+            <h1>مدير بدء التشغيل</h1>
+            <p>إدارة البرامج التي تبدأ تلقائياً مع تشغيل الويندوز</p>
+          </div>
+          <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="btn-primary" onclick="loadStartupItems()">🔄 تحديث القائمة</button>
+          </div>
+          <div class="drivers-list" id="startupList">
+            <div class="loading">جاري تحميل قائمة بدء التشغيل...</div>
+          </div>
+        </div>
+
+        <!-- RESTORE POINTS -->
+        <div class="page" id="page-restore">
+          <div class="page-header">
+            <h1>نقاط الاستعادة</h1>
+            <p>إنشاء وإدارة نقاط استعادة النظام</p>
+          </div>
+          <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="btn-primary" onclick="createNewRestorePoint()">➕ إنشاء نقطة استعادة</button>
+            <button class="btn-secondary" onclick="loadRestorePoints()">🔄 تحديث</button>
+          </div>
+          <div class="repair-results" id="restoreResults"></div>
+          <h2 style="font-size:16px; margin:20px 0 14px; color:var(--text-secondary);">نقاط الاستعادة المتاحة</h2>
+          <div class="drivers-list" id="restoreList">
+            <div class="loading">جاري تحميل نقاط الاستعادة...</div>
+          </div>
+        </div>
+
+        <!-- SPEED TEST -->
+        <div class="page" id="page-speedtest">
+          <div class="page-header">
+            <h1>اختبار سرعة الإنترنت</h1>
+            <p>اختبر سرعة التحميل والرفع والباينق</p>
+          </div>
+          <div class="repair-hero">
+            <div class="repair-card" style="position:relative; overflow:hidden;">
+              <div style="position:absolute; inset:0; background:linear-gradient(135deg, rgba(6,182,212,0.08), rgba(16,185,129,0.08)); pointer-events:none;"></div>
+              <div class="repair-icon">📡</div>
+              <h3>اختبر سرعة اتصالك</h3>
+              <p>سيتم اختبار سرعة التحميل والرفع والباينق مع تقييم شامل</p>
+              <button class="btn-hero" id="btnSpeedTest" onclick="startSpeedTest()">🚀 بدء الاختبار</button>
+            </div>
+          </div>
+          <div class="repair-progress" id="speedTestProgress" style="display:none;">
+            <h3 style="font-size:13px; margin-bottom:10px; color:var(--text-secondary);">جاري اختبار السرعة...</h3>
+            <div class="progress-bar"><div class="progress-fill" id="speedTestFill" style="width:0%"></div></div>
+            <div class="progress-text" id="speedTestText">جاري اختبار الباينق...</div>
+          </div>
+          <div id="speedTestResults" style="display:none;">
+            <div class="stats-grid">
+              <div class="stat-card"><div class="stat-icon">⬇️</div><div class="stat-info"><div class="stat-label">التحميل</div><div class="stat-value" id="speedDownload">--</div></div></div>
+              <div class="stat-card"><div class="stat-icon">⬆️</div><div class="stat-info"><div class="stat-label">الرفع</div><div class="stat-value" id="speedUpload">--</div></div></div>
+              <div class="stat-card"><div class="stat-icon">⏱️</div><div class="stat-info"><div class="stat-label">الباينق</div><div class="stat-value" id="speedPing">--</div></div></div>
+              <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-info"><div class="stat-label">التقييم</div><div class="stat-value" id="speedRating">--</div></div></div>
+            </div>
+          </div>
+          <div class="repair-results" id="speedTestDetails"></div>
+        </div>
+
+        <!-- PROCESS MANAGER -->
+        <div class="page" id="page-processes">
+          <div class="page-header">
+            <h1>مدير العمليات</h1>
+            <p>عرض وإدارة جميع البرامج والعمليات الشغالة</p>
+          </div>
+          <div class="stats-grid" id="processStats"></div>
+          <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="btn-primary" onclick="loadProcesses('cpu')">🔄 تحديث</button>
+            <select id="processSort" onchange="loadProcesses(this.value)" style="padding:10px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; color:var(--text-primary); font-size:13px;">
+              <option value="cpu">ترتيب حسب CPU</option>
+              <option value="memory">ترتيب حسب الذاكرة</option>
+            </select>
+          </div>
+          <div class="drivers-list" id="processList">
+            <div class="loading">جاري تحميل العمليات...</div>
+          </div>
+        </div>
+
+        <!-- DEFENDER MANAGER -->
+        <div class="page" id="page-defender">
+          <div class="page-header">
+            <h1>إدارة Windows Defender</h1>
+            <p>تفعيل/تعطيل الحماية + الفحص + الاستثناءات</p>
+          </div>
+          <div class="stats-grid" id="defenderStats"></div>
+          <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+            <button class="btn-primary" onclick="loadDefenderStatus()">🔄 تحديث</button>
+            <button class="btn-secondary" onclick="startDefenderScan('quick')">🔍 فحص سريع</button>
+            <button class="btn-secondary" onclick="startDefenderScan('full')">🔍 فحص شامل</button>
+            <button class="btn-secondary" onclick="updateDefenderDefs()">📥 تحديث التعريفات</button>
+          </div>
+          <div id="defenderToggles" style="margin-bottom:20px;">
+            <h2 style="font-size:16px; margin-bottom:14px; color:var(--text-secondary);">الإعدادات</h2>
+            <div class="tweaks-grid" id="defenderTweaks"></div>
+          </div>
+          <h2 style="font-size:16px; margin-bottom:14px; color:var(--text-secondary);">الاستثناءات</h2>
+          <div style="display:flex; gap:10px; margin-bottom:14px;">
+            <input type="text" id="defenderExclusionPath" placeholder="أدخل مسار المجلد..." style="flex:1; padding:10px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; color:var(--text-primary); font-size:13px;">
+            <button class="btn-primary" onclick="addDefenderExclusion()">➕ إضافة</button>
+          </div>
+          <div class="drivers-list" id="defenderExclusions"></div>
+          <div class="repair-progress" id="defenderScanProgress" style="display:none;">
+            <h3 style="font-size:13px; margin-bottom:10px; color:var(--text-secondary);">جاري الفحص...</h3>
+            <div class="progress-bar"><div class="progress-fill" id="defenderScanFill" style="width:0%"></div></div>
+            <div class="progress-text" id="defenderScanText">جاري الفحص...</div>
+          </div>
+          <div class="repair-results" id="defenderResults"></div>
+        </div>
+
+        <!-- BSOD ANALYZER -->
+        <div class="page" id="page-bsod">
+          <div class="page-header">
+            <h1>محلل شاشات الموت الزرقاء</h1>
+            <p>تحليل تقارير BSOD وملفات Minidump</p>
+          </div>
+          <div style="margin-bottom:20px;">
+            <button class="btn-primary" onclick="loadBSODReports()">🔄 تحديث التقارير</button>
+          </div>
+          <div class="drivers-list" id="bsodList">
+            <div class="loading">جاري تحميل تقارير BSOD...</div>
+          </div>
+          <div class="repair-results" id="bsodResults" style="margin-top:20px;"></div>
+        </div>
+
+        <!-- DUPLICATE FINDER -->
+        <div class="page" id="page-duplicates">
+          <div class="page-header">
+            <h1>البحث عن ملفات مكررة</h1>
+            <p>اكتشف واحذف الملفات المكررة لتوفير مساحة</p>
+          </div>
+          <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="btn-primary" id="btnFindDuplicates" onclick="startDuplicateScan()">🔍 بدء البحث</button>
+          </div>
+          <div class="repair-progress" id="dupProgress" style="display:none;">
+            <h3 style="font-size:13px; margin-bottom:10px; color:var(--text-secondary);">جاري البحث عن ملفات مكررة...</h3>
+            <div class="progress-bar"><div class="progress-fill" id="dupFill" style="width:0%"></div></div>
+            <div class="progress-text" id="dupText">جاري مسح المجلدات...</div>
+          </div>
+          <div id="dupResults" style="display:none;">
+            <div class="stats-grid">
+              <div class="stat-card"><div class="stat-icon">📑</div><div class="stat-info"><div class="stat-label">مجموعات مكررة</div><div class="stat-value" id="dupGroups">--</div></div></div>
+              <div class="stat-card"><div class="stat-icon">📄</div><div class="stat-info"><div class="stat-label">ملفات مكررة</div><div class="stat-value" id="dupFiles">--</div></div></div>
+              <div class="stat-card"><div class="stat-icon">💾</div><div class="stat-info"><div class="stat-label">مساحة مضيعة</div><div class="stat-value" id="dupWasted">--</div></div></div>
+            </div>
+          </div>
+          <div class="drivers-list" id="dupList"></div>
+        </div>
+
+        <!-- NETWORK MONITOR -->
+        <div class="page" id="page-netmon">
+          <div class="page-header">
+            <h1>مراقب الشبكة</h1>
+            <p>مراقبة اتصالات الشبكة النشطة + كلمات مرور WiFi</p>
+          </div>
+          <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="btn-primary" onclick="loadNetworkInfo()">🔄 تحديث</button>
+          </div>
+          <h2 style="font-size:16px; margin-bottom:14px; color:var(--text-secondary);">كروت الشبكة</h2>
+          <div class="stats-grid" id="netAdapters"></div>
+          <h2 style="font-size:16px; margin-bottom:14px; color:var(--text-secondary);">كلمات مرور WiFi المحفوظة</h2>
+          <div class="drivers-list" id="wifiList"></div>
+          <h2 style="font-size:16px; margin:20px 0 14px; color:var(--text-secondary);">الاتصالات النشطة</h2>
+          <div class="drivers-list" id="connList">
+            <div class="loading">جاري تحميل...</div>
+          </div>
+        </div>
+
+        <!-- SERVICE MANAGER -->
+        <div class="page" id="page-services">
+          <div class="page-header">
+            <h1>مدير الخدمات</h1>
+            <p>تشغيل/إيقاف/إعادة تشغيل خدمات الويندوز</p>
+          </div>
+          <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="btn-primary" onclick="loadServices()">🔄 تحديث</button>
+            <input type="text" id="serviceSearch" placeholder="بحث عن خدمة..." oninput="filterServices()" style="flex:1; padding:10px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; color:var(--text-primary); font-size:13px;">
+          </div>
+          <div class="drivers-list" id="serviceList">
+            <div class="loading">جاري تحميل الخدمات...</div>
+          </div>
+        </div>
+
+        <!-- CPU BENCHMARK -->
+        <div class="page" id="page-benchmark">
+          <div class="page-header">
+            <h1>مقارنة المعالج</h1>
+            <p>اختبار أداء المعالج ومقارنته بمراجع عالمية</p>
+          </div>
+          <div class="repair-hero">
+            <div class="repair-card" style="position:relative; overflow:hidden;">
+              <div style="position:absolute; inset:0; background:linear-gradient(135deg, rgba(245,158,11,0.08), rgba(239,68,68,0.08)); pointer-events:none;"></div>
+              <div class="repair-icon">📊</div>
+              <h3 id="benchCpuName">جاري تحميل معلومات المعالج...</h3>
+              <p>اختبار شامل: أعدادات + عائمة + نصوص + مصفوفات + متعدد النواة</p>
+              <button class="btn-hero" id="btnBenchmark" onclick="runBenchmark()" style="background:linear-gradient(135deg, #f59e0b, #ef4444);">🚀 بدء الاختبار</button>
+            </div>
+          </div>
+          <div class="repair-progress" id="benchProgress" style="display:none;">
+            <h3 style="font-size:13px; margin-bottom:10px; color:var(--text-secondary);">جاري اختبار المعالج...</h3>
+            <div class="progress-bar"><div class="progress-fill" id="benchFill" style="width:0%; background:linear-gradient(135deg, #f59e0b, #ef4444);"></div></div>
+            <div class="progress-text" id="benchText">جاري الاختبار...</div>
+          </div>
+          <div id="benchResults" style="display:none;">
+            <div class="stats-grid" style="grid-template-columns:repeat(3, 1fr);">
+              <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-info"><div class="stat-label">النتيجة الإجمالية</div><div class="stat-value" id="benchOverall">--</div></div></div>
+              <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-info"><div class="stat-label">التقييم</div><div class="stat-value" id="benchRating" style="font-size:14px;">--</div></div></div>
+              <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-info"><div class="stat-label">النواة/الخيوط</div><div class="stat-value" id="benchThreads">--</div></div></div>
+            </div>
+            <h2 style="font-size:16px; margin:20px 0 14px; color:var(--text-secondary);">تفاصيل الاختبار</h2>
+            <div class="tweaks-grid" id="benchDetails"></div>
+            <h2 style="font-size:16px; margin:20px 0 14px; color:var(--text-secondary);">مقارنة مع المعالجات</h2>
+            <div id="benchCompare"></div>
+          </div>
+        </div>
+
+        <!-- SYSTEM INFO -->
+        <div class="page" id="page-sysinfo">
+          <div class="page-header">
+            <h1>معلومات النظام</h1>
+            <p>معلومات شاملة عن جهازك</p>
+          </div>
+          <div style="margin-bottom:20px;">
+            <button class="btn-primary" onclick="loadFullSystemInfo()">🔄 تحديث</button>
+          </div>
+          <div id="sysInfoContent">
+            <div class="loading">جاري تحميل معلومات النظام...</div>
+          </div>
+        </div>
+
+        <!-- UNINSTALLER -->
+        <div class="page" id="page-uninstall">
+          <div class="page-header">
+            <h1>🗑️ إزالة البرامج</h1>
+            <p>إزالة البرامج العادية + تطبيقات Windows Store المخفية</p>
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+            <button class="btn-primary" onclick="switchUninstallTab('apps')" id="uninstallTabApps" style="background:rgba(124,58,237,0.3);">📦 البرامج العادية</button>
+            <button class="btn-primary" onclick="switchUninstallTab('store')" id="uninstallTabStore">🛒 تطبيقات Store</button>
+          </div>
+
+          <div id="uninstallSectionApps">
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+              <button class="btn-primary" onclick="loadInstalledApps()">🔄 تحديث</button>
+              <input type="text" id="appSearch" placeholder="بحث عن برنامج..." oninput="filterApps()" style="flex:1; padding:10px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; color:var(--text-primary); font-size:13px;">
+            </div>
+            <div class="drivers-list" id="appList">
+              <div class="loading">جاري تحميل البرامج...</div>
+            </div>
+          </div>
+
+          <div id="uninstallSectionStore" style="display:none;">
+            <div style="display:flex; gap:10px; margin-bottom:16px; align-items:center;">
+              <button class="btn-primary" onclick="loadStoreApps()">🔄 تحديث القائمة</button>
+              <button class="btn-hero" onclick="removeSelectedStoreApps()" style="background:linear-gradient(135deg,#ef4444,#dc2626);border:none;color:#fff;padding:8px 18px;border-radius:8px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">🗑️ إزالة المحدد</button>
+              <label style="display:flex;align-items:center;gap:6px;color:var(--text-secondary);font-size:13px;cursor:pointer;">
+                <input type="checkbox" id="storeShowSystemOnly" onchange="loadStoreApps()"> النظام فقط
+              </label>
+              <span style="color:var(--text-secondary);font-size:12px;" id="storeAppsCount"></span>
+            </div>
+            <div class="drivers-list" id="storeAppsList">
+              <div class="loading">جاري تحميل تطبيقات Store...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DISK SPACE ANALYZER -->
+        <div class="page" id="page-diskanalyzer">
+          <div class="page-header">
+            <h1>تحليل مساحة الألعاب</h1>
+            <p>مساحة الألعاب المخزنة على جهازك + آخر وقت لعب + توصيات بالحذف</p>
+          </div>
+          <div style="margin-bottom:20px;">
+            <button class="btn-primary" onclick="scanGamesForDisk()">🔍 تحليل الألعاب</button>
+          </div>
+          <div class="repair-progress" id="diskGameProgress" style="display:none;">
+            <h3 style="font-size:13px; margin-bottom:10px; color:var(--text-secondary);">جاري تحليل الألعاب...</h3>
+            <div class="progress-bar"><div class="progress-fill" id="diskGameFill" style="width:0%"></div></div>
+            <div class="progress-text" id="diskGameText">جاري مسح الألعاب...</div>
+          </div>
+          <div id="diskGameResults" style="display:none;">
+            <div class="stats-grid" id="diskGameStats"></div>
+            <div class="games-list" id="diskGameList"></div>
+          </div>
+        </div>
+
+        <!-- GPU OPTIMIZER -->
+        <div class="page" id="page-gpu">
+          <div class="page-header">
+            <h1>🖥️ تحسين GPU</h1>
+            <p>تحسين إعدادات كرت الشاشة لأقصى أداء</p>
+          </div>
+          <div id="gpuInfo" style="margin-bottom:20px;"></div>
+          <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="btn-hero" onclick="optimizeGPU()" style="background:linear-gradient(135deg,#7c3aed,#2563eb);border:none;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">🚀 تحسين GPU</button>
+            <button class="btn-hero" onclick="revertGPU()" style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">↩️ إعادة</button>
+          </div>
+          <div class="repair-results" id="gpuResults"></div>
+        </div>
+
+        <!-- MOUSE LATENCY FIX -->
+        <div class="page" id="page-mousefix">
+          <div class="page-header">
+            <h1>🖱️ إصلاح تأخير الإدخال (Input Lag)</h1>
+            <p>تقليل تأخير الماوس + الكيبورد + تعطيل تحسينات الشاشة الكاملة</p>
+          </div>
+          <div class="repair-hero">
+            <div class="repair-card" style="position:relative; overflow:hidden;">
+              <div style="position:absolute; inset:0; background:linear-gradient(135deg, rgba(6,182,212,0.08), rgba(124,58,237,0.08)); pointer-events:none;"></div>
+              <div class="repair-icon">🖱️</div>
+              <h3>الإصلاح السريع</h3>
+              <p>تعطيل تسريع الماوس + تقليل Buffer + تعطيل Game DVR + منع تحسينات الشاشة الكاملة</p>
+              <div style="display:flex; gap:10px; justify-content:center; margin-top:12px;">
+                <button class="btn-hero" onclick="applyAllInputLagFixes()" style="background:linear-gradient(135deg,#06b6d4,#2563eb);border:none;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">🚀 تطبيق الكل</button>
+                <button class="btn-hero" onclick="revertAllInputLagFixes()" style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">↩️ إعادة</button>
+              </div>
+            </div>
+          </div>
+          <h2 style="font-size:16px;margin:18px 0 12px;color:var(--text-secondary);">🔧 التعديلات المفصلة</h2>
+          <div class="tweaks-grid" id="inputLagTweaksList">
+            <div class="empty-state" style="padding:16px;"><div class="empty-icon">🖱️</div><p>اضغط "تطبيق الكل" لإصلاح تأخير الإدخال</p></div>
+          </div>
+          <div class="repair-results" id="mouseResults"></div>
+        </div>
+
+        <!-- GAME TRANSLATOR -->
+        <div class="page" id="page-gametranslator">
+          <div class="page-header">
+            <h1>🌍 مترجم الألعاب بالوقت الفعلي</h1>
+            <p>ترجمة النصوص الإنجليزية في الألعاب مباشرة — OCR + ترجمة أونلاين</p>
+          </div>
+
+          <div class="hero-card" style="margin-bottom:20px;">
+            <div class="hero-icon">🔤</div>
+            <h3>كيف يعمل؟</h3>
+            <p>التقاط نص من الشاشة ← قراءة النص (OCR) ← ترجمة فورية للعربي. اختر منطقة محددة أو كل الشاشة.</p>
+          </div>
+
+          <div class="tweaks-grid" style="margin-bottom:20px;">
+            <div class="tweak-card" style="flex-direction:column; align-items:flex-start; gap:10px;">
+              <div class="tweak-name">🎮 وضع الترجمة</div>
+              <div class="tweak-desc" style="margin-bottom:8px;">التقاط نص من منطقة محددة من الشاشة</div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <select id="translatorMode" style="padding:7px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:8px; color:#e8e8ff; font-size:12px; cursor:pointer;">
+                  <option value="region">منطقة محددة</option>
+                  <option value="fullscreen">الشاشة الكاملة</option>
+                </select>
+                <select id="translatorScreen" style="padding:7px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:8px; color:#e8e8ff; font-size:12px; cursor:pointer;">
+                  <option value="0">الشاشة الرئيسية</option>
+                </select>
+              </div>
+            </div>
+            <div class="tweak-card" style="flex-direction:column; align-items:flex-start; gap:10px;">
+              <div class="tweak-name">⏱️ سرعة التحديث</div>
+              <div class="tweak-desc" style="margin-bottom:8px;">كل كم ميلي ثانية يحصل تحديث</div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <select id="translatorInterval" style="padding:7px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:8px; color:#e8e8ff; font-size:12px; cursor:pointer;">
+                  <option value="1000">سريع (1 ثانية)</option>
+                  <option value="2000" selected>عادي (2 ثانية)</option>
+                  <option value="3000">بطيء (3 ثواني)</option>
+                  <option value="5000">موفر (5 ثواني)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="tweaks-grid" style="margin-bottom:20px;">
+            <div class="tweak-card" style="flex-direction:column; align-items:flex-start; gap:10px;">
+              <div class="tweak-name">📐 منطقة التقاط النص</div>
+              <div class="tweak-desc">حدد الإحداثيات يدوياً أو استخدم الشاشة الكاملة</div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+                <div style="display:flex; align-items:center; gap:4px;">
+                  <span style="font-size:11px; color:#8888bb;">X:</span>
+                  <input id="regionX" type="number" value="100" style="width:70px; padding:5px 8px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:6px; color:#e8e8ff; font-size:12px;">
+                </div>
+                <div style="display:flex; align-items:center; gap:4px;">
+                  <span style="font-size:11px; color:#8888bb;">Y:</span>
+                  <input id="regionY" type="number" value="100" style="width:70px; padding:5px 8px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:6px; color:#e8e8ff; font-size:12px;">
+                </div>
+                <div style="display:flex; align-items:center; gap:4px;">
+                  <span style="font-size:11px; color:#8888bb;">العرض:</span>
+                  <input id="regionW" type="number" value="500" style="width:70px; padding:5px 8px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:6px; color:#e8e8ff; font-size:12px;">
+                </div>
+                <div style="display:flex; align-items:center; gap:4px;">
+                  <span style="font-size:11px; color:#8888bb;">الارتفاع:</span>
+                  <input id="regionH" type="number" value="200" style="width:70px; padding:5px 8px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:6px; color:#e8e8ff; font-size:12px;">
+                </div>
+              </div>
+            </div>
+            <div class="tweak-card" style="flex-direction:column; align-items:flex-start; gap:10px;">
+              <div class="tweak-name">🌐 اتجاه الترجمة</div>
+              <div class="tweak-desc">من اللغة إلى اللغة</div>
+              <div style="display:flex; gap:8px; align-items:center; margin-top:6px;">
+                <select id="translatorFrom" style="padding:7px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:8px; color:#e8e8ff; font-size:12px; cursor:pointer;">
+                  <option value="en">الإنجليزية</option>
+                  <option value="ja">اليابانية</option>
+                  <option value="ko">الكورية</option>
+                  <option value="zh">الصينية</option>
+                  <option value="fr">الفرنسية</option>
+                  <option value="de">الألمانية</option>
+                  <option value="es">الإسبانية</option>
+                  <option value="ru">الروسية</option>
+                </select>
+                <span style="color:#00c8ff; font-size:16px;">→</span>
+                <select id="translatorTo" style="padding:7px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:8px; color:#e8e8ff; font-size:12px; cursor:pointer;">
+                  <option value="ar">العربية</option>
+                  <option value="en">الإنجليزية</option>
+                  <option value="fr">الفرنسية</option>
+                  <option value="de">الألمانية</option>
+                  <option value="es">الإسبانية</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+            <button class="btn-hero" id="btnStartTranslator" onclick="startGameTranslator()" style="display:flex; align-items:center; gap:8px;">
+              ▶️ بدء الترجمة المباشرة
+            </button>
+            <button class="btn-hero" id="btnStopTranslator" onclick="stopGameTranslator()" style="display:none; background:rgba(255,51,102,0.2); border:1px solid rgba(255,51,102,0.3); color:#ff3366; box-shadow:0 0 15px rgba(255,51,102,0.15); display:none;">
+              ⏹️ إيقاف الترجمة
+            </button>
+            <button class="btn-hero" onclick="translatorCaptureOnce()" style="background:rgba(170,68,255,0.2); border:1px solid rgba(170,68,255,0.3); color:#aa44ff; box-shadow:0 0 15px rgba(170,68,255,0.15); display:flex; align-items:center; gap:8px;">
+              📸 التقاط مرة واحدة
+            </button>
+            <button class="btn-hero" id="btnShowOverlay" onclick="showTranslatorOverlay()" style="background:rgba(0,255,136,0.2); border:1px solid rgba(0,255,136,0.3); color:#00ff88; box-shadow:0 0 15px rgba(0,255,136,0.15); display:flex; align-items:center; gap:8px;">
+              🪟 إظهار النافذة العائمة
+            </button>
+            <button class="btn-hero" id="btnHideOverlay" onclick="hideTranslatorOverlay()" style="background:rgba(255,149,0,0.2); border:1px solid rgba(255,149,0,0.3); color:#ff9500; box-shadow:0 0 15px rgba(255,149,0,0.15); display:none; align-items:center; gap:8px;">
+              🙈 إخفاء النافذة
+            </button>
+          </div>
+
+          <div class="repair-progress" id="translatorProgress" style="display:none;">
+            <h3 style="font-size:13px; margin-bottom:10px; color:var(--text-secondary);">جاري الترجمة...</h3>
+            <div class="progress-bar"><div class="progress-fill" id="translatorFill" style="width:0%"></div></div>
+            <div class="progress-text" id="translatorText">جاري بدء الترجمة...</div>
+          </div>
+
+          <div id="translatorPreview" style="margin-bottom:20px;">
+            <div class="tweak-card" style="flex-direction:column; gap:12px; padding:20px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                <span style="font-size:18px;">📝</span>
+                <span style="font-size:14px; font-weight:700;">النص المترجم</span>
+                <span id="translatorStatus" style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(0,255,136,0.1); color:#00ff88; font-weight:700;">جاهز</span>
+              </div>
+              <div id="translatorOriginalText" style="font-size:12px; color:#8888bb; padding:10px; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid rgba(255,255,255,0.05); direction:ltr; text-align:left; line-height:1.6; display:none;"></div>
+              <div id="translatorTranslatedText" style="font-size:16px; font-weight:600; color:#00e5ff; padding:14px; background:linear-gradient(135deg, rgba(0,200,255,0.06), rgba(170,68,255,0.04)); border-radius:12px; border:1px solid rgba(0,200,255,0.15); line-height:2; min-height:50px; text-shadow:0 0 8px rgba(0,200,255,0.2);">اضغط "بدء الترجمة" لبدء التقاط النص وترجمته...</div>
+            </div>
+          </div>
+
+          <div id="translatorHistorySection" style="display:none;">
+            <h2 style="font-size:14px; margin-bottom:10px; color:var(--text-secondary);">سجل الترجمات</h2>
+            <div class="repair-results" id="translatorHistory" style="max-height:200px;"></div>
+          </div>
+        </div>
+
+        <!-- NETWORK MANAGER -->
+        <div class="page" id="page-netmanager">
+          <div class="page-header">
+            <h1>📡 مدير الشبكة</h1>
+            <p>من على شبكتك؟ قدر تحددهم وتتحكم باتصالهم</p>
+          </div>
+          <div style="margin-bottom:16px;">
+            <button class="btn-hero" onclick="scanNetworkDevices()" id="btnScanNet" style="background:linear-gradient(135deg,#7c3aed,#2563eb);border:none;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">🔍 فحص الشبكة</button>
+          </div>
+          <div id="networkDeviceInfo" style="margin-bottom:16px; color:#94a3b8; font-size:13px; font-family:Cairo,sans-serif;"></div>
+          <div id="blockedDevicesSection" style="margin-bottom:16px; display:none;">
+            <h3 style="font-size:14px; margin-bottom:8px; color:#ef4444;">Devices Blocked by Firewall</h3>
+            <div id="blockedDevicesList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:8px;"></div>
+          </div>
+          <div id="networkDevicesList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:12px;"></div>
+        </div>
+
+        <!-- WIFI ANALYZER -->
+        <div class="page" id="page-wifi">
+          <div class="page-header">
+            <h1>📶 محلل WiFi</h1>
+            <p>تحليل إشارات WiFi المتاحة وقوة الاتصال</p>
+          </div>
+          <div style="margin-bottom:16px;">
+            <button class="btn-hero" onclick="scanWifiNetworks()" id="btnWifiScan" style="background:linear-gradient(135deg,#7c3aed,#2563eb);border:none;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">🔍 فحص الشبكات</button>
+          </div>
+          <div id="currentWifiInfo" style="margin-bottom:16px;"></div>
+          <div id="wifiNetworksList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;"></div>
+        </div>
+
+        <!-- PING MONITOR -->
+        <div class="page" id="page-pingmon">
+          <div class="page-header">
+            <h1>🏓 مراقب Ping</h1>
+            <p>مراقبة سرعة الاتصال بأي سيرفر</p>
+          </div>
+          <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+            <input type="text" id="pingTargetInput" placeholder="السيرفر (مثلاً 8.8.8.8)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px 16px; color:#fff; font-family:Cairo,sans-serif; font-size:13px; width:250px;" />
+            <button class="btn-hero" onclick="startPingTest()" style="background:linear-gradient(135deg,#7c3aed,#2563eb);border:none;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">🚀 ابدأ الاختبار</button>
+          </div>
+          <div id="pingResults" style="margin-bottom:16px;"></div>
+          <div class="repair-results" id="pingHistory"></div>
+        </div>
+
+        <!-- PRIVACY TWEAKS -->
+        <div class="page" id="page-privacy">
+          <div class="page-header">
+            <h1>🔒 خصوصية النظام</h1>
+            <p>تعطيل Telemetry و تحسين الخصوصية على Windows</p>
+          </div>
+          <div style="margin-bottom:16px;">
+            <button class="btn-hero" onclick="applyAllPrivacy()" id="btnAllPrivacy" style="background:linear-gradient(135deg,#7c3aed,#2563eb);border:none;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">🚀 تطبيق الكل</button>
+          </div>
+          <div id="privacyTweaksList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:12px;"></div>
+          <div class="repair-results" id="privacyResults" style="margin-top:16px;"></div>
+        </div>
+
+        <!-- TEMPERATURE MONITOR -->
+        <div class="page" id="page-temp">
+          <div class="page-header">
+            <h1>🌡️ مراقب الحرارة</h1>
+            <p>مراقبة حرارة المعالج والمكونات</p>
+          </div>
+          <div style="margin-bottom:16px;">
+            <button class="btn-hero" onclick="refreshTemps()" style="background:linear-gradient(135deg,#7c3aed,#2563eb);border:none;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">🔄 تحديث</button>
+          </div>
+          <div id="tempDisplay" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:12px;"></div>
+        </div>
+
+        <!-- CONTEXT MENU EDITOR -->
+        <div class="page" id="page-ctxmenu">
+          <div class="page-header">
+            <h1>📋 قائمة كليك يمين</h1>
+            <p>إضافة أو حذف عناصر من قائمة كليك يمين</p>
+          </div>
+          <div style="display:flex; gap:10px; margin-bottom:16px;">
+            <input type="text" id="ctxMenuName" placeholder="اسم العنصر" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px 16px; color:#fff; font-family:Cairo,sans-serif; font-size:13px; width:180px;" />
+            <input type="text" id="ctxMenuCmd" placeholder="الأمر (مثلاً notepad.exe)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px 16px; color:#fff; font-family:Cairo,sans-serif; font-size:13px; width:300px;" />
+            <button class="btn-hero" onclick="addCtxMenuItem()" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;color:#fff;padding:10px 20px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">➕ إضافة</button>
+          </div>
+          <div id="ctxMenuList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:12px;"></div>
+        </div>
+
+        <!-- BROWSER CLEANUP -->
+        <div class="page" id="page-fpsoverlay">
+          <div class="page-header">
+            <h1>📟 FPS In-Game Overlay</h1>
+            <p>طبقة شفافة فوق الألعاب تعرض FPS + CPU + RAM + GPU + Ping</p>
+          </div>
+          <div class="repair-hero">
+            <div class="repair-card" style="position:relative; overflow:hidden;">
+              <div style="position:absolute; inset:0; background:linear-gradient(135deg, rgba(0,200,255,0.08), rgba(124,58,237,0.08)); pointer-events:none;"></div>
+              <div class="repair-icon">📟</div>
+              <h3>FPS Overlay</h3>
+              <p>نافذة شفافة صغيرة تظهر فوق أي لعبة — تعرض إحصائيات الأداء بشكل مباشر. تقدر تحركها وتخليها تتجاهل الماوس عشان ما تأثر على اللعب.</p>
+              <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px;">
+                <button class="btn-hero" id="btnStartOverlay" onclick="startFpsOverlay()" style="background:linear-gradient(135deg,#06b6d4,#2563eb);border:none;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">📟 تشغيل الـ Overlay</button>
+                <button class="btn-hero" id="btnStopOverlay" onclick="stopFpsOverlay()" style="display:none;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">⏹️ إيقاف</button>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:20px;">
+            <h2 style="font-size:16px;margin-bottom:12px;color:var(--text-secondary);">⚙️ الإعدادات</h2>
+            <div class="tweaks-grid">
+              <div class="tweak-card" style="flex-direction:row;align-items:center;gap:12px;">
+                <label class="tweak-toggle" style="margin:0;">
+                  <input type="checkbox" id="overlayMousePassthrough" checked onchange="toggleOverlayMouseMode()">
+                  <span class="toggle-slider"></span>
+                </label>
+                <div class="tweak-info">
+                  <div class="tweak-name">تجاهل الماوس (Click-Through)</div>
+                  <div class="tweak-desc">الماوس يمر عبر الـ Overlay بدون تأثير — مثالي للألعاب</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="repair-results" id="overlayResults" style="margin-top:16px;"></div>
+        </div>
+
+        <div class="page" id="page-browsrclean">
+          <div class="page-header">
+            <h1>🌐 تنظيف المتصفحات</h1>
+            <p>حذف ذاكرة التخزين المؤقت لجميع المتصفحات</p>
+          </div>
+          <div style="margin-bottom:16px;">
+            <button class="btn-hero" onclick="cleanAllBrowsers()" style="background:linear-gradient(135deg,#7c3aed,#2563eb);border:none;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700;">🧹 تنظيف الكل</button>
+          </div>
+          <div id="browserSizesList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;"></div>
+        </div>
+
+      </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

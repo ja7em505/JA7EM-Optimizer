@@ -1,0 +1,283 @@
+﻿const fs = require('fs');
+const path = require('path');
+const https = require('https');
+const crypto = require('crypto');
+
+const CONFIG_DIR = path.join(process.env.APPDATA || process.env.HOME, 'JA7EM-Optimizer');
+const LICENSE_FILE = path.join(CONFIG_DIR, 'license.dat');
+const ATTEMPTS_FILE = path.join(CONFIG_DIR, 'attempts.log');
+const CACHE_FILE = path.join(CONFIG_DIR, 'license_cache.dat');
+
+const GIST_ID = '7770924e5e10b9094ba9099efc1d4f97';
+const GITHUB_TOKEN = process.env.GH_LICENSE_TOKEN || '';
+
+const ENCRYPTION_KEY = crypto.createHash('sha256').update('JA7EM-OPTIMIZER-2024-SECURE-KEY').digest();
+const IV_LENGTH = 16;
+
+function encrypt(text) {
+  const iv = crypto.randomBytes(IV_LENGTH);
+  const cipher = crypto.createCipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return iv.toString('hex') + ':' + encrypted;
+}
+
+function decrypt(text) {
+  const parts = text.split(':');
+  const iv = Buffer.from(parts.shift(), 'hex');
+  const encryptedText = parts.join(':');
+  const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
+  let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
+
+function ensureConfigDir() {
+  if (!fs.existsSync(CONFIG_DIR)) {
+    fs.mkdirSync(CONFIG_DIR, { recursive: true });
+  }
+}
+
+function generateKey() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const segments = [];
+  for (let s = 0; s < 3; s++) {
+    let seg = '';
+    for (let i = 0; i < 4; i++) {
+      seg += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    segments.push(seg);
+  }
+  return 'JA7EM-' + segments.join('-');
+}
+
+function hashKey(key) {
+  return crypto.createHash('sha256').update(key.toUpperCase().trim()).digest('hex');
+}
+
+function fetchFromGist() {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'api.github.com',
+      path: '/gists/' + GIST_ID,
+      method: 'GET',
+      headers: {
+        'User-Agent': 'JA7EM-Optimizer',
+        'Authorization': 'token ' + GITHUB_TOKEN,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    };
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => data += chunk);
+      res.on('end', () => {
+        try {
+          const gist = JSON.parse(data);
+          const files = Object.values(gist.files || {});
+          if (files.length > 0) {
+            resolve(JSON.parse(files[0].content));
+          } else {
+            resolve(null);
+          }
+        } catch (e) {
+          reject(e);
+        }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(10000, () => { req.destroy(); reject(new Error('Timeout')); });
+    req.end();
+  });
+}
+
+async function pushToGist(data) {
+  try {
+    let existing = null;
+    try { existing = await fetchFromGist(); } catch (e) {}
+    let merged;
+    if (existing && data.type === 'crack_attempts') {
+      merged = { keys: existing.keys || [], crack_attempts: data.attempts || [] };
+    } else if (data.keys) {
+      merged = data;
+      if (existing && existing.crack_attempts) merged.crack_attempts = existing.crack_attempts;
+    } else {
+      merged = existing || { keys: [] };
+    }
+    const payload = JSON.stringify({
+      files: {
+        'ja7em_license.json': {
+          content: JSON.stringify(merged, null, 2)
+        }
+      }
+    });
+    return new Promise((resolve, reject) => {
+      const options = {
+        hostname: 'api.github.com',
+        path: '/gists/' + GIST_ID,
+        method: 'PATCH',
+        headers: {
+          'User-Agent': 'JA7EM-Optimizer',
+          'Authorization': 'token ' + GITHUB_TOKEN,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload)
+        }
+      };
+      const req = https.request(options, (res) => {
+        let d = '';
+        res.on('data', (chunk) => d += chunk);
+        res.on('end', () => { try { resolve(JSON.parse(d)); } catch(e) { resolve(null); } });
+      });
+      req.on('error', reject);
+      req.write(payload);
+      req.end();
+    });
+  } catch (e) { return null; }
+}
+
+function logCrackAttempt(key, reason, deviceInfo) {
+  try {
+    ensureConfigDir();
+    const attempt = { key, reason, time: new Date().toISOString(), device: deviceInfo || 'Unknown' };
+    let attempts = [];
+    if (fs.existsSync(ATTEMPTS_FILE)) {
+      try { attempts = JSON.parse(fs.readFileSync(ATTEMPTS_FILE, 'utf8')); } catch (e) {}
+    }
+    attempts.push(attempt);
+    if (attempts.length > 100) attempts = attempts.slice(-100);
+    fs.writeFileSync(ATTEMPTS_FILE, JSON.stringify(attempts, null, 2));
+    pushToGist({ type: 'crack_attempts', attempts: attempts.slice(-20) }).catch(() => {});
+  } catch (e) {}
+}
+
+function getDeviceInfo() {
+  const os = require('os');
+  return { hostname: os.hostname(), platform: os.platform(), arch: os.arch(), user: os.userInfo().username };
+}
+
+async function validateLicense(key) {
+  try {
+    const upperKey = key.toUpperCase().trim();
+    if (!/^JA7EM-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(upperKey)) {
+      return { valid: false, reason: 'invalid_format' };
+    }
+
+    let gistData = null;
+    try {
+      gistData = await fetchFromGist();
+    } catch (e) {
+      const cached = getCache();
+      if (cached && cached.key === upperKey) {
+        return { valid: true, expiry: cached.expiry, type: cached.type, cached: true };
+      }
+      return { valid: false, reason: 'offline' };
+    }
+
+    if (!gistData || !gistData.keys) {
+      return { valid: false, reason: 'no_keys' };
+    }
+
+    const keyHash = hashKey(upperKey);
+    const keyEntry = gistData.keys.find(k => k.hash === keyHash);
+
+    if (!keyEntry) {
+      logCrackAttempt(upperKey, 'key_not_found', getDeviceInfo());
+      return { valid: false, reason: 'key_not_found' };
+    }
+
+    if (keyEntry.status === 'revoked') {
+      logCrackAttempt(upperKey, 'key_revoked', getDeviceInfo());
+      return { valid: false, reason: 'key_revoked' };
+    }
+
+    if (keyEntry.expiry && new Date(keyEntry.expiry) < new Date()) {
+      logCrackAttempt(upperKey, 'key_expired', getDeviceInfo());
+      return { valid: false, reason: 'key_expired' };
+    }
+
+    if (keyEntry.maxDevices) {
+      const deviceId = getDeviceId();
+      if (!keyEntry.devices) keyEntry.devices = [];
+      if (!keyEntry.devices.includes(deviceId)) {
+        if (keyEntry.devices.length >= keyEntry.maxDevices) {
+          logCrackAttempt(upperKey, 'max_devices_reached', getDeviceInfo());
+          return { valid: false, reason: 'max_devices_reached' };
+        }
+        keyEntry.devices.push(deviceId);
+        gistData.keys = gistData.keys.map(k => k.hash === keyHash ? keyEntry : k);
+        pushToGist(gistData).catch(() => {});
+      }
+    }
+
+    saveCache(upperKey, keyEntry.expiry, keyEntry.type || 'standard');
+    return { valid: true, expiry: keyEntry.expiry, type: keyEntry.type || 'standard' };
+  } catch (e) {
+    return { valid: false, reason: 'error', error: e.message };
+  }
+}
+
+function getDeviceId() {
+  const os = require('os');
+  const data = os.hostname() + os.platform() + os.arch();
+  return crypto.createHash('md5').update(data).digest('hex').substring(0, 16);
+}
+
+function saveCache(key, expiry, type) {
+  try {
+    ensureConfigDir();
+    const data = { key, expiry, type, timestamp: Date.now() };
+    fs.writeFileSync(CACHE_FILE, encrypt(JSON.stringify(data)));
+  } catch (e) {}
+}
+
+function getCache() {
+  try {
+    if (!fs.existsSync(CACHE_FILE)) return null;
+    const raw = fs.readFileSync(CACHE_FILE, 'utf8');
+    const data = JSON.parse(decrypt(raw));
+    if (Date.now() - data.timestamp > 7 * 24 * 60 * 60 * 1000) return null;
+    return data;
+  } catch (e) { return null; }
+}
+
+function saveLicense(key, data) {
+  try {
+    ensureConfigDir();
+    const enc = encrypt(JSON.stringify({ key, ...data }));
+    fs.writeFileSync(LICENSE_FILE, enc);
+  } catch (e) {}
+}
+
+function getSavedLicense() {
+  try {
+    if (!fs.existsSync(LICENSE_FILE)) return null;
+    const raw = fs.readFileSync(LICENSE_FILE, 'utf8');
+    return JSON.parse(decrypt(raw));
+  } catch (e) { return null; }
+}
+
+function getAttempts() {
+  try {
+    if (!fs.existsSync(ATTEMPTS_FILE)) return [];
+    return JSON.parse(fs.readFileSync(ATTEMPTS_FILE, 'utf8'));
+  } catch (e) { return []; }
+}
+
+function getLicenseStatus() {
+  const saved = getSavedLicense();
+  if (!saved || !saved.key) return { active: false, status: 'none' };
+  if (saved.expiry && new Date(saved.expiry) < new Date()) {
+    return { active: false, status: 'expired', key: saved.key, type: saved.type, expiry: saved.expiry };
+  }
+  return { active: true, status: 'active', key: saved.key, type: saved.type, expiry: saved.expiry };
+}
+
+function isLicenseActive() {
+  return getLicenseStatus().active;
+}
+
+module.exports = {
+  generateKey, hashKey, validateLicense, saveLicense, getSavedLicense,
+  logCrackAttempt, getAttempts, fetchFromGist, pushToGist, getDeviceInfo, getDeviceId,
+  getLicenseStatus, isLicenseActive
+};

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>FPS Overlay</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: rgba(10, 10, 30, 0.7);
+      color: #e8e8ff;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 200, 255, 0.15);
+      user-select: none;
+      -webkit-app-region: drag;
+      width: 100vw;
+      height: 100vh;
+    }
+    .bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 10px;
+      background: rgba(0,0,0,0.4);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
+    }
+    .bar-title { font-weight: 700; background: linear-gradient(135deg,#00c8ff,#aa44ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .bar-close { width:18px;height:18px;border:none;border-radius:4px;background:rgba(255,51,102,0.15);color:#ff3366;font-size:10px;cursor:pointer;-webkit-app-region:no-drag;display:flex;align-items:center;justify-content:center; }
+    .bar-close:hover { background:rgba(255,51,102,0.3); }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 8px 10px;
+      -webkit-app-region: no-drag;
+    }
+    .item {
+      background: rgba(255,255,255,0.04);
+      border-radius: 6px;
+      padding: 6px 8px;
+      text-align: center;
+    }
+    .item .val {
+      font-size: 18px;
+      font-weight: 800;
+      background: linear-gradient(135deg,#00c8ff,#7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .item .val.green { background: linear-gradient(135deg,#00ff88,#00c8ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .item .val.yellow { background: linear-gradient(135deg,#f59e0b,#ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .item .val.red { background: linear-gradient(135deg,#ef4444,#dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .item .lbl { font-size: 9px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .wide { grid-column: span 2; }
+    .row { display: flex; gap: 4px; align-items: center; justify-content: center; }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <span class="bar-title">JA7EM OVERLAY</span>
+    <button class="bar-close" onclick="window.close()">✕</button>
+  </div>
+  <div class="grid">
+    <div class="item">
+      <div class="val" id="fpsVal">--</div>
+      <div class="lbl">FPS</div>
+    </div>
+    <div class="item">
+      <div class="val" id="cpuVal">--%</div>
+      <div class="lbl">CPU</div>
+    </div>
+    <div class="item">
+      <div class="val" id="ramVal">--</div>
+      <div class="lbl">RAM</div>
+    </div>
+    <div class="item">
+      <div class="val" id="gpuVal">--%</div>
+      <div class="lbl">GPU</div>
+    </div>
+    <div class="item wide">
+      <div class="row">
+        <div class="val green" id="pingVal" style="font-size:14px;">-- ms</div>
+        <span style="color:rgba(255,255,255,0.2);font-size:10px;">|</span>
+        <div class="val" id="procVal" style="font-size:14px;">--</div>
+      </div>
+      <div class="lbl">Ping | اللعبة النشطة</div>
+    </div>
+  </div>
+  <script>
+    if (window.electronAPI && window.electronAPI.onFpsOverlayData) {
+      window.electronAPI.onFpsOverlayData(d => {
+        const f = document.getElementById('fpsVal');
+        if (d.fps !== undefined) { f.textContent = d.fps; f.className = 'val' + (d.fps < 30 ? ' red' : d.fps < 60 ? ' yellow' : d.fps >= 120 ? ' green' : ''); }
+        const c = document.getElementById('cpuVal');
+        if (d.cpu !== undefined) { c.textContent = d.cpu + '%'; c.className = 'val' + (d.cpu > 80 ? ' red' : d.cpu > 50 ? ' yellow' : ''); }
+        const r = document.getElementById('ramVal');
+        if (d.ram !== undefined) { r.textContent = d.ram + '%'; r.className = 'val' + (d.ram > 80 ? ' red' : d.ram > 60 ? ' yellow' : ''); }
+        const g = document.getElementById('gpuVal');
+        if (d.gpu !== undefined) { g.textContent = d.gpu + '%'; g.className = 'val' + (d.gpu > 80 ? ' red' : d.gpu > 50 ? ' yellow' : ''); }
+        if (d.ping !== undefined) document.getElementById('pingVal').textContent = d.ping + ' ms';
+        if (d.process !== undefined) document.getElementById('procVal').textContent = d.process;
+      });
+    }
+  </script>
+</body>
+</html>
