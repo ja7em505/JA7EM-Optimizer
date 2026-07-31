@@ -72,6 +72,9 @@ let isLicensed = false;
 
 function requireLicense(handler) {
   return async (event, ...args) => {
+    if (protection.isLocked()) {
+      return { error: 'device_locked', message: 'This device is locked' };
+    }
     if (!licenseManager.isLicenseActive()) {
       return { error: 'license_required', message: 'This feature requires an active license' };
     }
@@ -112,11 +115,23 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  if (protection.isLocked()) {
+    console.log('[SECURITY] Device is locked. Exiting.');
+    app.exit(1);
+    return;
+  }
   createWindow();
   isLicensed = licenseManager.isLicenseActive();
   const securityResults = protection.initialize(mainWindow);
   console.log('[SECURITY] Startup check:', JSON.stringify(securityResults));
-  protection.checkDevTools(mainWindow);
+  if (securityResults.locked) {
+    setTimeout(() => app.exit(1), 1500);
+    return;
+  }
+  protection.onViolation((reason) => {
+    console.log('[SECURITY] Violation:', reason);
+    setTimeout(() => { try { app.quit(); } catch (e) { app.exit(1); } }, 1800);
+  });
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.checkForUpdatesAndNotify().catch(() => {});
@@ -308,6 +323,11 @@ ipcMain.handle('validate-license', async (event, key) => {
   } else {
     licenseManager.logCrackAttempt(key, result.reason, licenseManager.getDeviceInfo());
     protection.logModification('license_invalid', `Reason: ${result.reason}, Key: ${key.substring(0, 10)}...`);
+    if (result.reason === 'device_banned') {
+      licenseManager.clearSavedLicense();
+      protection.hardLock('device_banned');
+      mainWindow.webContents.send('security-alert', 'banned');
+    }
   }
   return result;
 });

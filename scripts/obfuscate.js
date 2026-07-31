@@ -5,7 +5,8 @@ const path = require('path');
 const FILES_TO_OBFUSCATE = [
   'src/main/license-manager.js',
   'src/main/integrity.js',
-  'src/main/protection.js'
+  'src/main/protection.js',
+  'src/main/integrity-expected.js'
 ];
 
 const OBFUSCATION_OPTIONS = {

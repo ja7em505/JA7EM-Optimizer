@@ -4,8 +4,8 @@ const crypto = require('crypto');
 const { app } = require('electron');
 
 const CONFIG_DIR = path.join(process.env.APPDATA || process.env.HOME, 'JA7EM-Optimizer');
-const HASH_FILE = path.join(CONFIG_DIR, 'integrity.dat');
-const SIGNATURE_FILE = path.join(CONFIG_DIR, 'signature.dat');
+
+const expectedHash = require('./integrity-expected');
 
 const PROTECTED_FILES = [
   'src/main/main.js',
@@ -14,11 +14,10 @@ const PROTECTED_FILES = [
   'src/main/protection.js',
   'src/preload/preload.js',
   'src/renderer/index.html',
-  'src/renderer/renderer.js',
-  'src/renderer/styles/app.css'
+  'src/renderer/renderer.js'
 ];
 
-const HIDDEN_WATERMARKS = ['JA7EM_OPTIMIZER_v1', 'BY_JA7EM_ONLY', 'DO_NOT_MODIFY'];
+const HIDDEN_WATERMARKS = ['JA7EM_AUTHENTIC', 'LICENSED_SOFTWARE', 'INTEGRITY_CHECK'];
 
 function getAppRoot() {
   if (app.isPackaged) return path.join(process.resourcesPath, 'app.asar');
@@ -32,49 +31,24 @@ function calculateFileHash(filePath) {
   } catch (e) { return null; }
 }
 
-function generateIntegrityHash() {
+function calculateCombinedHash() {
   const root = getAppRoot();
-  const hashes = {};
+  const parts = [];
   for (const file of PROTECTED_FILES) {
     const hash = calculateFileHash(path.join(root, file));
-    if (hash) hashes[file] = hash;
+    if (!hash) return null;
+    parts.push(hash);
   }
-  return crypto.createHash('sha256').update(Object.values(hashes).join('|')).digest('hex');
-}
-
-function saveIntegrityHash() {
-  try {
-    if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR, { recursive: true });
-    const hash = generateIntegrityHash();
-    fs.writeFileSync(HASH_FILE, hash);
-    return hash;
-  } catch (e) { return null; }
+  return crypto.createHash('sha256').update(parts.join('|')).digest('hex');
 }
 
 function verifyIntegrity() {
   try {
-    if (!fs.existsSync(HASH_FILE)) return { valid: false, reason: 'no_hash_file' };
-    const savedHash = fs.readFileSync(HASH_FILE, 'utf8').trim();
-    const currentHash = generateIntegrityHash();
-    if (savedHash !== currentHash) return { valid: false, reason: 'file_modified' };
+    const currentHash = calculateCombinedHash();
+    if (!currentHash) return { valid: false, reason: 'missing_file' };
+    if (currentHash !== expectedHash) return { valid: false, reason: 'file_modified' };
     return { valid: true };
   } catch (e) { return { valid: false, reason: 'error' }; }
-}
-
-function saveSignature() {
-  try {
-    if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR, { recursive: true });
-    const sig = crypto.createHash('sha256').update('JA7EM_AUTHENTIC_' + Date.now()).digest('hex');
-    fs.writeFileSync(SIGNATURE_FILE, sig);
-    return sig;
-  } catch (e) { return null; }
-}
-
-function verifySignature() {
-  try {
-    if (!fs.existsSync(SIGNATURE_FILE)) return false;
-    return fs.readFileSync(SIGNATURE_FILE, 'utf8').trim().length === 64;
-  } catch (e) { return false; }
 }
 
 function checkWatermarks() {
@@ -90,6 +64,5 @@ function checkWatermarks() {
 }
 
 module.exports = {
-  generateIntegrityHash, saveIntegrityHash, verifyIntegrity,
-  saveSignature, verifySignature, checkWatermarks
+  verifyIntegrity, checkWatermarks
 };

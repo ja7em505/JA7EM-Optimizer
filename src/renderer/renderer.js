@@ -179,10 +179,24 @@ document.getElementById('license-key-input').addEventListener('input', function(
 
 if (electronAPI.securityAlert) {
   electronAPI.securityAlert((type) => {
-    if (type === 'debugger') {
-      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a1a;color:#ef4444;font-size:1.5em;font-family:sans-serif;">Security violation detected. Application will close.</div>';
-      setTimeout(() => electronAPI.close(), 3000);
-    }
+    const reasons = {
+      debugger: 'Debugger detected',
+      integrity: 'Application integrity compromised',
+      license: 'License revoked',
+      banned: 'This device has been banned'
+    };
+    const msg = reasons[type] || 'Security violation detected';
+    document.body.innerHTML = ''
+      + '<div id="security-lock" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;'
+      + 'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+      + 'background:#0a0a1a;color:#ef4444;font-family:sans-serif;user-select:none;">'
+      + '<div style="font-size:4em;margin-bottom:20px;">&#128274;</div>'
+      + '<div style="font-size:1.6em;font-weight:bold;margin-bottom:10px;">' + msg + '</div>'
+      + '<div style="font-size:1em;color:#999;">Application will close automatically.</div>'
+      + '</div>';
+    document.addEventListener('contextmenu', (e) => e.preventDefault(), true);
+    document.addEventListener('keydown', (e) => e.preventDefault(), true);
+    try { electronAPI.close(); } catch (e) {}
   });
 }
 

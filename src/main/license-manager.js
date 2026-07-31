@@ -7,6 +7,10 @@ const CONFIG_DIR = path.join(process.env.APPDATA || process.env.HOME, 'JA7EM-Opt
 const LICENSE_FILE = path.join(CONFIG_DIR, 'license.dat');
 const ATTEMPTS_FILE = path.join(CONFIG_DIR, 'attempts.log');
 const CACHE_FILE = path.join(CONFIG_DIR, 'license_cache.dat');
+const BAN_FILE = path.join(CONFIG_DIR, 'ban.dat');
+
+const BAN_THRESHOLD = 5;
+const BAN_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 const GIST_ID = '7770924e5e10b9094ba9099efc1d4f97';
 const GITHUB_TOKEN = require('./license-token');
@@ -96,10 +100,19 @@ async function pushToGist(data) {
     try { existing = await fetchFromGist(); } catch (e) {}
     let merged;
     if (existing && data.type === 'crack_attempts') {
-      merged = { keys: existing.keys || [], crack_attempts: data.attempts || [] };
+      merged = { keys: existing.keys || [], crack_attempts: data.attempts || [], banned_devices: existing.banned_devices || [] };
+    } else if (data.type === 'ban') {
+      merged = existing || { keys: [], crack_attempts: [], banned_devices: [] };
+      if (!merged.keys) merged.keys = [];
+      if (!merged.crack_attempts) merged.crack_attempts = [];
+      if (!merged.banned_devices) merged.banned_devices = [];
+      if (!merged.banned_devices.some(b => b.deviceId === data.deviceId)) {
+        merged.banned_devices.push({ deviceId: data.deviceId, reason: data.reason, time: new Date().toISOString() });
+      }
     } else if (data.keys) {
       merged = data;
       if (existing && existing.crack_attempts) merged.crack_attempts = existing.crack_attempts;
+      if (existing && existing.banned_devices) merged.banned_devices = existing.banned_devices;
     } else {
       merged = existing || { keys: [] };
     }
@@ -158,9 +171,8 @@ function getDeviceInfo() {
 async function validateLicense(key) {
   try {
     const upperKey = key.toUpperCase().trim();
-    if (!/^JA7EM-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(upperKey)) {
-      return { valid: false, reason: 'invalid_format' };
-    }
+    if (getLocalBan()) return { valid: false, reason: 'device_banned' };
+    const formatOk = /^JA7EM-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(upperKey);
 
     let gistData = null;
     try {
@@ -177,11 +189,30 @@ async function validateLicense(key) {
       return { valid: false, reason: 'no_keys' };
     }
 
+    const bannedList = gistData.banned_devices || [];
+    if (bannedList.some(b => b.deviceId === getDeviceId())) {
+      saveLocalBan('device_banned');
+      return { valid: false, reason: 'device_banned' };
+    }
+
+    if (!formatOk) {
+      logCrackAttempt(upperKey, 'invalid_format', getDeviceInfo());
+      if (countRecentFailedAttempts(gistData) >= BAN_THRESHOLD) {
+        await banDevice('too_many_failed_attempts');
+        return { valid: false, reason: 'device_banned' };
+      }
+      return { valid: false, reason: 'invalid_format' };
+    }
+
     const keyHash = hashKey(upperKey);
     const keyEntry = gistData.keys.find(k => k.hash === keyHash);
 
     if (!keyEntry) {
       logCrackAttempt(upperKey, 'key_not_found', getDeviceInfo());
+      if (countRecentFailedAttempts(gistData) >= BAN_THRESHOLD) {
+        await banDevice('too_many_failed_attempts');
+        return { valid: false, reason: 'device_banned' };
+      }
       return { valid: false, reason: 'key_not_found' };
     }
 
@@ -220,6 +251,79 @@ function getDeviceId() {
   const os = require('os');
   const data = os.hostname() + os.platform() + os.arch();
   return crypto.createHash('md5').update(data).digest('hex').substring(0, 16);
+}
+
+function deviceIdFromAttempt(attempt) {
+  if (!attempt || !attempt.device || typeof attempt.device !== 'object') return null;
+  const data = (attempt.device.hostname || '') + (attempt.device.platform || '') + (attempt.device.arch || '');
+  if (!data) return null;
+  return crypto.createHash('md5').update(data).digest('hex').substring(0, 16);
+}
+
+function countRecentFailedAttempts(gistData) {
+  try {
+    const deviceId = getDeviceId();
+    const attempts = (gistData && gistData.crack_attempts) || [];
+    const now = Date.now();
+    return attempts.filter(a => {
+      if (!a.time) return false;
+      try { if (now - new Date(a.time).getTime() > BAN_WINDOW_MS) return false; } catch (e) { return false; }
+      return deviceIdFromAttempt(a) === deviceId;
+    }).length;
+  } catch (e) { return 0; }
+}
+
+function getLocalBan() {
+  try {
+    if (!fs.existsSync(BAN_FILE)) return null;
+    const data = JSON.parse(decrypt(fs.readFileSync(BAN_FILE, 'utf8')));
+    if (data.deviceId !== getDeviceId()) return null;
+    return data;
+  } catch (e) { return null; }
+}
+
+function saveLocalBan(reason) {
+  try {
+    ensureConfigDir();
+    const data = { deviceId: getDeviceId(), reason, time: new Date().toISOString() };
+    fs.writeFileSync(BAN_FILE, encrypt(JSON.stringify(data)));
+  } catch (e) {}
+}
+
+async function getBannedDevices() {
+  try {
+    const gistData = await fetchFromGist();
+    return (gistData && gistData.banned_devices) || [];
+  } catch (e) { return []; }
+}
+
+async function isDeviceBanned() {
+  try { if (getLocalBan()) return true; } catch (e) {}
+  try {
+    const banned = await getBannedDevices();
+    return banned.some(b => b.deviceId === getDeviceId());
+  } catch (e) { return false; }
+}
+
+async function banDevice(reason) {
+  try {
+    const deviceId = getDeviceId();
+    saveLocalBan(reason);
+    await pushToGist({ type: 'ban', deviceId, reason });
+  } catch (e) {}
+}
+
+function clearSavedLicense() {
+  try {
+    if (fs.existsSync(LICENSE_FILE)) fs.unlinkSync(LICENSE_FILE);
+    if (fs.existsSync(CACHE_FILE)) fs.unlinkSync(CACHE_FILE);
+  } catch (e) {}
+}
+
+async function revalidateSaved() {
+  const saved = getSavedLicense();
+  if (!saved || !saved.key) return { valid: false, reason: 'no_license' };
+  return await validateLicense(saved.key);
 }
 
 function saveCache(key, expiry, type) {
@@ -279,5 +383,7 @@ function isLicenseActive() {
 module.exports = {
   generateKey, hashKey, validateLicense, saveLicense, getSavedLicense,
   logCrackAttempt, getAttempts, fetchFromGist, pushToGist, getDeviceInfo, getDeviceId,
-  getLicenseStatus, isLicenseActive
+  getLicenseStatus, isLicenseActive,
+  clearSavedLicense, revalidateSaved, isDeviceBanned, getBannedDevices, banDevice,
+  countRecentFailedAttempts, getLocalBan
 };
