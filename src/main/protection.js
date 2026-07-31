@@ -48,6 +48,18 @@ function isLocked() {
   try { return fs.existsSync(LOCK_FILE); } catch (e) { return false; }
 }
 
+function getLockReason() {
+  try {
+    if (!fs.existsSync(LOCK_FILE)) return null;
+    const data = JSON.parse(fs.readFileSync(LOCK_FILE, 'utf8'));
+    return data.reason || null;
+  } catch (e) { return null; }
+}
+
+function clearLock() {
+  try { if (fs.existsSync(LOCK_FILE)) fs.unlinkSync(LOCK_FILE); } catch (e) {}
+}
+
 function hardLock(reason) {
   if (_hardLocked) return;
   _hardLocked = true;
@@ -113,13 +125,8 @@ function handleWatermarks(mainWindow) {
 
 async function handleLicenseRevalidation(mainWindow) {
   try {
-    if (licenseManager.getLocalBan()) {
-      licenseManager.clearSavedLicense();
-      emitSecurityAlert(mainWindow, 'banned');
-      hardLock('device_banned');
-      return;
-    }
-    if (await licenseManager.isDeviceBanned()) {
+    const banned = await licenseManager.isDeviceBanned();
+    if (banned) {
       licenseManager.clearSavedLicense();
       emitSecurityAlert(mainWindow, 'banned');
       hardLock('device_banned');
@@ -174,6 +181,7 @@ function initialize(mainWindow) {
 module.exports = {
   initialize, runFullSecurityCheck, isDebuggerAttached, monitorDebugger: handleDebugger,
   checkDevTools, logModification, getModificationLogs, hardLock, isLocked, onViolation,
+  getLockReason, clearLock,
   isDebuggerDetected: () => _debuggerDetected,
   isIntegrityPassed: () => _integrityPassed,
   isLicenseValid: () => _licenseValid

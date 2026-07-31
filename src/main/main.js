@@ -114,11 +114,31 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   if (protection.isLocked()) {
-    console.log('[SECURITY] Device is locked. Exiting.');
-    app.exit(1);
-    return;
+    const lockReason = protection.getLockReason();
+    let canBoot = false;
+    if (lockReason === 'device_banned') {
+      const forgive = await licenseManager.tryForgiveBan();
+      if (forgive.forgiven) {
+        protection.clearLock();
+        licenseManager.clearLocalBan();
+        console.log('[SECURITY] Ban forgiven online. Unlocked.');
+        canBoot = true;
+      } else {
+        console.log('[SECURITY] Device is banned. Exiting.');
+      }
+    } else if (lockReason === 'license_revoked') {
+      protection.clearLock();
+      console.log('[SECURITY] License lock cleared. Activation required.');
+      canBoot = true;
+    } else {
+      console.log('[SECURITY] Device is locked. Exiting.');
+    }
+    if (!canBoot) {
+      app.exit(1);
+      return;
+    }
   }
   createWindow();
   isLicensed = licenseManager.isLicenseActive();

@@ -171,13 +171,13 @@ function getDeviceInfo() {
 async function validateLicense(key) {
   try {
     const upperKey = key.toUpperCase().trim();
-    if (getLocalBan()) return { valid: false, reason: 'device_banned' };
     const formatOk = /^JA7EM-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(upperKey);
 
     let gistData = null;
     try {
       gistData = await fetchFromGist();
     } catch (e) {
+      if (getLocalBan()) return { valid: false, reason: 'device_banned' };
       const cached = getCache();
       if (cached && cached.key === upperKey) {
         return { valid: true, expiry: cached.expiry, type: cached.type, cached: true };
@@ -186,6 +186,7 @@ async function validateLicense(key) {
     }
 
     if (!gistData || !gistData.keys) {
+      if (getLocalBan()) return { valid: false, reason: 'device_banned' };
       return { valid: false, reason: 'no_keys' };
     }
 
@@ -194,6 +195,7 @@ async function validateLicense(key) {
       saveLocalBan('device_banned');
       return { valid: false, reason: 'device_banned' };
     }
+    if (getLocalBan()) clearLocalBan();
 
     if (!formatOk) {
       logCrackAttempt(upperKey, 'invalid_format', getDeviceInfo());
@@ -290,19 +292,42 @@ function saveLocalBan(reason) {
   } catch (e) {}
 }
 
-async function getBannedDevices() {
+function clearLocalBan() {
+  try { if (fs.existsSync(BAN_FILE)) fs.unlinkSync(BAN_FILE); } catch (e) {}
+}
+
+async function fetchBannedStatus() {
   try {
     const gistData = await fetchFromGist();
     return (gistData && gistData.banned_devices) || [];
-  } catch (e) { return []; }
+  } catch (e) { return null; }
+}
+
+async function getBannedDevices() {
+  const banned = await fetchBannedStatus();
+  return banned || [];
 }
 
 async function isDeviceBanned() {
-  try { if (getLocalBan()) return true; } catch (e) {}
-  try {
-    const banned = await getBannedDevices();
-    return banned.some(b => b.deviceId === getDeviceId());
-  } catch (e) { return false; }
+  const banned = await fetchBannedStatus();
+  if (banned === null) {
+    try { if (getLocalBan()) return true; } catch (e) {}
+    return false;
+  }
+  if (banned.some(b => b.deviceId === getDeviceId())) {
+    saveLocalBan('device_banned');
+    return true;
+  }
+  clearLocalBan();
+  return false;
+}
+
+async function tryForgiveBan() {
+  const banned = await fetchBannedStatus();
+  if (banned === null) return { forgiven: false, offline: true };
+  if (banned.some(b => b.deviceId === getDeviceId())) return { forgiven: false };
+  clearLocalBan();
+  return { forgiven: true };
 }
 
 async function banDevice(reason) {
@@ -385,5 +410,5 @@ module.exports = {
   logCrackAttempt, getAttempts, fetchFromGist, pushToGist, getDeviceInfo, getDeviceId,
   getLicenseStatus, isLicenseActive,
   clearSavedLicense, revalidateSaved, isDeviceBanned, getBannedDevices, banDevice,
-  countRecentFailedAttempts, getLocalBan
+  countRecentFailedAttempts, getLocalBan, clearLocalBan, fetchBannedStatus, tryForgiveBan
 };
