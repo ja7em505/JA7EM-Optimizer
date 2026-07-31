@@ -145,6 +145,7 @@ ipcMain.on('window-maximize', () => {
 });
 ipcMain.on('window-close', () => mainWindow.close());
 
+ipcMain.handle('get-app-version', () => app.getVersion());
 ipcMain.handle('get-system-info', async () => await systemMonitor.getSystemInfo());
 ipcMain.handle('get-live-stats', async () => await systemMonitor.getLiveStats());
 ipcMain.handle('apply-fps-boost', requireLicense(async (event, options) => await fpsBoost.applyBoost(options)));

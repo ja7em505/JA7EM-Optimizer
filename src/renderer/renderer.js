@@ -203,10 +203,18 @@ function updateDashboardLicense(status) {
   expEl.textContent = info.sub;
 }
 
+async function loadAppVersion() {
+  try {
+    const version = await window.electronAPI.getAppVersion();
+    const el = document.getElementById('app-version');
+    if (el && version) el.textContent = 'v' + version;
+  } catch (e) {}
+}
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => { checkLicense(); });
+  document.addEventListener('DOMContentLoaded', () => { checkLicense(); loadAppVersion(); });
 } else {
-  checkLicense();
+  checkLicense(); loadAppVersion();
 }
 
 document.querySelectorAll('.nav-item').forEach(item => {
