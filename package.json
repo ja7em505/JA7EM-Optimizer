@@ -1,6 +1,6 @@
 {
     "name":  "ja7em-optimizer",
-    "version":  "1.1.1",
+    "version":  "1.1.2",
     "description":  "JA7EM PC Optimizer - Boost FPS, Update Drivers, Clean System",
     "main":  "src/main/main.js",
     "scripts":  {
@@ -32,7 +32,7 @@
                   "productName":  "JA7EM Optimizer",
                   "publish":  {
                                   "provider":  "github",
-                                  "owner":  "JA7EM",
+                                  "owner":  "ja7em505",
                                   "repo":  "JA7EM-Optimizer"
                               },
                   "win":  {
