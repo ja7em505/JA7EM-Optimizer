@@ -58,3 +58,5 @@ function obfuscateAll() {
 }
 
 module.exports = { obfuscateAll, obfuscateFile };
+
+if (require.main === module) obfuscateAll();
