@@ -73,15 +73,21 @@ async function captureFullScreen() {
   }
 }
 
+const OCR_API_KEY = process.env.OCR_API_KEY || '';
+
 async function ocrWithAPI(imageDataUrl) {
   try {
+    if (!OCR_API_KEY) {
+      console.error('OCR API key is not set. Set the OCR_API_KEY environment variable.');
+      return '';
+    }
     const base64Data = imageDataUrl.replace(/^data:image\/\w+;base64,/, '');
 
     const response = await fetch('https://api.ocr.space/parse/image', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'apikey': 'K85588334388957' 
+        'apikey': OCR_API_KEY
       },
       body: `base64Image=data:image/png;base64,${base64Data}&language=eng&isOverlayRequired=false&OCREngine=2`
     });
