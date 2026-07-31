@@ -4,7 +4,7 @@
 
 **The All-in-One PC Gaming Optimizer — Boost FPS, Clean Your System, Repair & Monitor Everything**
 
-![Version](https://img.shields.io/badge/version-1.1.1-5865F2)
+![Version](https://img.shields.io/badge/version-1.1.5-5865F2)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-00A4EF)
 ![Electron](https://img.shields.io/badge/Electron-37-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)

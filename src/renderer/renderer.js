@@ -206,8 +206,11 @@ function updateDashboardLicense(status) {
 async function loadAppVersion() {
   try {
     const version = await window.electronAPI.getAppVersion();
-    const el = document.getElementById('app-version');
-    if (el && version) el.textContent = 'v' + version;
+    if (!version) return;
+    const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+    setText('app-version', 'v' + version);
+    setText('activity-version', 'JA7EM OPTIMIZER v' + version);
+    setText('footer-version', 'JA7EM OPTIMIZER v' + version);
   } catch (e) {}
 }
 
