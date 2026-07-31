@@ -4,3 +4,4 @@ dist/
 admin/
 assets/
 .env
+src/main/license-token.js

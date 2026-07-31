@@ -9,7 +9,7 @@ const ATTEMPTS_FILE = path.join(CONFIG_DIR, 'attempts.log');
 const CACHE_FILE = path.join(CONFIG_DIR, 'license_cache.dat');
 
 const GIST_ID = '7770924e5e10b9094ba9099efc1d4f97';
-const GITHUB_TOKEN = process.env.GH_LICENSE_TOKEN || '';
+const GITHUB_TOKEN = require('./license-token');
 
 const ENCRYPTION_KEY = crypto.createHash('sha256').update('JA7EM-OPTIMIZER-2024-SECURE-KEY').digest();
 const IV_LENGTH = 16;
