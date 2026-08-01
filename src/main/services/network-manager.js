@@ -1,4 +1,4 @@
-﻿const { exec } = require('child_process');
+const { exec } = require('child_process');
 const os = require('os');
 
 function runCmd(cmd, timeout = 15000) {

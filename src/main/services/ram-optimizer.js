@@ -14,7 +14,7 @@ function runPs(cmd, timeout = 15000) {
 
 function runPsScript(script, timeout = 30000) {
   return new Promise((resolve, reject) => {
-    const tmpFile = path.join(os.tmpdir(), 'ja7em_ps_' + Date.now() + '.ps1');
+    const tmpFile = path.join(os.tmpdir(), 'cj_ps_' + Date.now() + '.ps1');
     fs.writeFileSync(tmpFile, script, 'utf8');
     exec('powershell -NoProfile -ExecutionPolicy Bypass -File "' + tmpFile + '"', { encoding: 'utf8', timeout }, (err) => {
       try { fs.unlinkSync(tmpFile); } catch (e) {}

@@ -1,7 +1,7 @@
 {
-    "name":  "CJ-Optimizer",
-    "version":  "1.1.18",
-    "description":  "CJ Optimizer - Boost FPS, Update Drivers, Clean System",
+    "name":  "cj-optimizer",
+    "version":  "1.1.19",
+    "description":  "CJ PC Optimizer - Boost FPS, Update Drivers, Clean System",
     "main":  "src/main/main.js",
     "scripts":  {
                     "start":  "electron .",
@@ -41,7 +41,7 @@
                   "publish":  {
                                   "provider":  "github",
                                   "owner":  "ja7em505",
-                                  "repo":  "JA7EM-Optimizer"
+                                  "repo": "JA7EM-Optimizer"
                               },
                   "win":  {
                               "target":  "nsis",

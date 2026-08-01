@@ -1,4 +1,4 @@
-﻿const RPC = require('discord-rpc');
+const RPC = require('discord-rpc');
 const { app } = require('electron');
 
 const DEFAULT_CLIENT_ID = '1531976098185875457';
@@ -39,10 +39,10 @@ function setActivity() {
   try {
     client.setActivity({
       details: 'برنامج تحسين الألعاب',
-      state: 'CJ Optimizer v' + app.getVersion(),
+      state: 'CJ OPTIMIZER v' + app.getVersion(),
       startTimestamp: Date.now(),
       largeImageKey: 'icon',
-      largeImageText: 'CJ Optimizer',
+      largeImageText: 'CJ OPTIMIZER',
       instance: false
     });
   } catch (e) {}

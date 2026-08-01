@@ -1,4 +1,4 @@
-﻿let currentPage = 'dashboard';
+let currentPage = 'dashboard';
 let monitorInterval = null;
 let selectedPreset = 'balanced';
 let scannedGames = [];

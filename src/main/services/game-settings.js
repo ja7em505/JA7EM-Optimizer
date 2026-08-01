@@ -509,7 +509,7 @@ async function applySystemTweak(tweak) {
 }
 
 function backupConfig(configPath) {
-  const backupDir = path.join(path.dirname(configPath), 'JA7EM_Backup');
+  const backupDir = path.join(path.dirname(configPath), 'CJ_Backup');
   if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
   const backupPath = path.join(backupDir, path.basename(configPath) + '.backup');
   fs.copyFileSync(configPath, backupPath);
@@ -594,7 +594,7 @@ async function applyGamePreset(gamePath, presetName, configs) {
 }
 
 function revertGameConfigs(gamePath) {
-  const backupDir = path.join(gamePath, 'JA7EM_Backup');
+  const backupDir = path.join(gamePath, 'CJ_Backup');
   if (!fs.existsSync(backupDir))
     return { status: 'failed', message: 'لا توجد نسخة احتياطية' };
   try {
