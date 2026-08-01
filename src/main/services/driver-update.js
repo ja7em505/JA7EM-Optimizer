@@ -38,12 +38,12 @@ async function getDrivers() {
 
 async function updateDriver(deviceId) {
   try {
-    await runFireAndForget(
-      'pnputil /scan-devices',
-      60000
-    );
-    return { status: 'success', message: 'تم البحث عن تحديثات التعريفات' };
-  } catch (error) {
+    if (deviceId) {
+      await runFireAndForget(`pnputil /enum-devices ${deviceId} 2>nul`, 15000);
+    }
+    await runFireAndForget('pnputil /scan-devices', 60000);
+    return { status: 'success', message: deviceId ? `Scanned updates for ${deviceId}` : 'تم البحث عن تحديثات التعريفات' };
+  } catch (e) {
     return { status: 'failed', message: 'فشل تحديث التعريف' };
   }
 }

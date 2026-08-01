@@ -12,7 +12,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   applyFpsBoost: (options) => ipcRenderer.invoke('apply-fps-boost', options),
   revertFpsBoost: () => ipcRenderer.invoke('revert-fps-boost'),
 
-  createRestorePoint: () => ipcRenderer.invoke('create-restore-point'),
   cleanSystem: () => ipcRenderer.invoke('clean-system'),
 
   getDrivers: () => ipcRenderer.invoke('get-drivers'),
@@ -65,7 +64,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   getRamInfo: () => ipcRenderer.invoke('get-ram-info'),
   cleanRam: () => ipcRenderer.invoke('clean-ram'),
-  setProcessPriority: (processName, priority) => ipcRenderer.invoke('set-process-priority', processName, priority),
 
   getDiskHealth: () => ipcRenderer.invoke('get-disk-health'),
   checkDiskErrors: (drive) => ipcRenderer.invoke('check-disk-errors', drive),

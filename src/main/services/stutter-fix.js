@@ -20,11 +20,11 @@ const STUTTER_FIXES = {
     name: 'تحسين دقة المؤقت',
     description: 'يقلل التأخير ويخلي الفريمات أكثر سلاسة',
     commands: [
-      'bcdedit /set useplatformtick yes',
+      'bcdedit /set useplatformclock yes',
       'bcdedit /set disabledynamictick yes'
     ],
     revert: [
-      'bcdedit /deletevalue useplatformtick',
+      'bcdedit /deletevalue useplatformclock',
       'bcdedit /deletevalue disabledynamictick'
     ]
   },

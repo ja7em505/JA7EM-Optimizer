@@ -199,6 +199,9 @@ async function repairDLL() {
 async function fullWindowsRepair() {
   const allResults = [];
 
+  const sfc = await repairWindows();
+  allResults.push(...sfc);
+
   const registry = await repairRegistry();
   allResults.push(...registry);
 

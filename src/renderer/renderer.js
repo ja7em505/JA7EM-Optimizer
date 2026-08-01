@@ -876,7 +876,16 @@ async function cleanTemp() {
 
 async function cleanDNS() {
   showToast('جاري تنظيف DNS...');
-  showToast('تم تنظيف DNS Cache');
+  try {
+    const result = await window.electronAPI.flushDns();
+    if (result && result.status === 'success') {
+      showToast('تم تنظيف DNS Cache بنجاح');
+    } else {
+      showToast('فشل تنظيف DNS');
+    }
+  } catch (e) {
+    showToast('فشل تنظيف DNS');
+  }
 }
 
 async function createBackup() {
