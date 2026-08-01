@@ -1,6 +1,6 @@
 {
-    "name":  "JA7EM-Optimizer",
-    "version":  "1.1.17",
+    "name":  "CJ-Optimizer",
+    "version":  "1.1.18",
     "description":  "CJ Optimizer - Boost FPS, Update Drivers, Clean System",
     "main":  "src/main/main.js",
     "scripts":  {

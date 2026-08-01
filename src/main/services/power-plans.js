@@ -77,7 +77,7 @@ async function createGamingPlan() {
     }
 
     if (newGuid) {
-      await runFireAndForget(`powercfg /changename ${newGuid} "JA7EM Gaming" "خطة ألعاب - أقصى أداء"`, 10000);
+      await runFireAndForget(`powercfg /changename ${newGuid} "CJ Gaming" "خطة ألعاب - أقصى أداء"`, 10000);
 
       const settings = [
         'SUB_PROCESSOR PROCTHROTTLEMIN 100',
@@ -102,7 +102,7 @@ async function createGamingPlan() {
 
       await runFireAndForget(`powercfg /setactive ${newGuid}`, 10000);
 
-      return { status: 'success', message: 'تم إنشاء وتفعيل خطة JA7EM Gaming', guid: newGuid };
+      return { status: 'success', message: 'تم إنشاء وتفعيل خطة CJ Gaming', guid: newGuid };
     }
 
     return { status: 'failed', message: 'فشل إنشاء الخطة' };

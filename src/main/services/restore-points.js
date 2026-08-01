@@ -35,7 +35,7 @@ async function getRestorePoints() {
   return points;
 }
 
-async function createRestorePoint(description = 'JA7EM Restore Point') {
+async function createRestorePoint(description = 'CJ Restore Point') {
   try {
     try {
       await runFireAndForget('powershell -Command "Enable-ComputerRestore -Drive \\"C:\\"" 2>$null', 10000);
