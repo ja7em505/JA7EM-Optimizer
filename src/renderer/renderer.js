@@ -143,6 +143,8 @@ async function activateLicense() {
       else if (result.reason === 'key_revoked') errorMsg = 'This key has been revoked';
       else if (result.reason === 'key_expired') errorMsg = 'This key has expired';
       else if (result.reason === 'max_devices_reached') errorMsg = 'Maximum devices reached for this key';
+      else if (result.reason === 'device_mismatch') errorMsg = 'This key is locked to a different device';
+      else if (result.reason === 'device_banned') errorMsg = 'This device is banned';
       else if (result.reason === 'offline') errorMsg = 'Cannot verify key (offline). Try again later.';
       else if (result.reason === 'invalid_format') errorMsg = 'Invalid key format. Use: JA7EM-XXXX-XXXX-XXXX';
       msgEl.innerHTML = '<div style="color:#ef4444; padding:8px; background:rgba(239,68,68,0.1); border-radius:6px;">' + errorMsg + '</div>';
@@ -234,12 +236,12 @@ async function checkForUpdates() {
   try {
     const result = await window.electronAPI.checkForUpdates();
     if (result && result.version) {
-      showToast('Update found: v' + result.version, 'info');
+      showToast('Update v' + result.version + ' found — downloading now...', 'info');
     } else {
-      showToast('You are already up to date', 'info');
+      showToast('You are up to date — no update available', 'info');
     }
   } catch (e) {
-    showToast('Update check failed', 'info');
+    showToast('Could not check for updates — try again later', 'info');
   } finally {
     if (btn) { btn.textContent = '🔄 Check Update'; btn.disabled = false; }
   }

@@ -331,7 +331,12 @@ ipcMain.handle('get-directory-tree', async (event, dirPath, depth, maxSize) => a
 ipcMain.handle('get-top-files', async (event, dirPath, limit) => await diskAnalyzer.getTopFiles(dirPath, limit));
 ipcMain.handle('delete-disk-item', async (event, itemPath) => await diskAnalyzer.deleteItem(itemPath));
 ipcMain.handle('open-external', async (event, url) => await shell.openExternal(url));
-ipcMain.handle('check-for-updates', async () => { try { const result = await autoUpdater.checkForUpdates(); return result ? { version: result.updateInfo.version } : null; } catch (e) { return null; } });
+ipcMain.handle('check-for-updates', async () => {
+  try {
+    const result = await autoUpdater.checkForUpdatesAndNotify();
+    return result && result.updateInfo ? { version: result.updateInfo.version } : null;
+  } catch (e) { return null; }
+});
 ipcMain.handle('install-update', () => { autoUpdater.quitAndInstall(); });
 
 ipcMain.handle('validate-license', async (event, key) => {
