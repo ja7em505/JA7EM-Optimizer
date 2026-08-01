@@ -149,7 +149,7 @@ function monitor(mainWindow) {
     try { handleWatermarks(mainWindow); } catch (e) {}
     try { handleDebugger(mainWindow); } catch (e) {}
     try { checkDevTools(mainWindow); } catch (e) {}
-    if (tick % 12 === 0) {
+    if (tick % 6 === 0) {
       try { await handleLicenseRevalidation(mainWindow); } catch (e) {}
     }
   }, 5000);
