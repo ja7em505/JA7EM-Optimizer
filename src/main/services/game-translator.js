@@ -1,180 +1,177 @@
 const { desktopCapturer, screen, BrowserWindow } = require('electron');
 const path = require('path');
+const https = require('https');
 
 let overlayWindow = null;
 let captureInterval = null;
 let isTranslating = false;
 let lastTranslatedText = '';
 let translationHistory = [];
+const translationCache = new Map();
 let settings = {
   mode: 'region',
   region: { x: 0, y: 0, width: 400, height: 200 },
   screenIndex: 0,
-  interval: 2500,
+  interval: 2000,
   sourceLang: 'en',
   targetLang: 'ar'
 };
 
+const OCR_API_KEY = process.env.OCR_API_KEY || 'K85588334388957';
+
+function httpGet(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => { try { resolve(JSON.parse(d)); } catch (e) { resolve(null); } });
+    }).on('error', reject);
+  });
+}
+
+function httpPost(url, headers, body) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = https.request({
+      hostname: u.hostname,
+      path: u.pathname + u.search,
+      method: 'POST',
+      headers
+    }, (res) => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        try { resolve(JSON.parse(d)); } catch (e) { resolve(null); }
+      });
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+}
+
 async function captureRegion(region) {
   try {
+    const primary = screen.getPrimaryDisplay();
+    const { width: sw, height: sh } = primary.size;
     const sources = await desktopCapturer.getSources({
       types: ['screen'],
-      thumbnailSize: { width: 1920, height: 1080 }
+      thumbnailSize: { width: Math.min(sw, 2560), height: Math.min(sh, 1440) }
     });
-
     if (!sources || sources.length === 0) return null;
-
     const source = sources[settings.screenIndex] || sources[0];
     const thumbnail = source.thumbnail;
-
     if (!thumbnail || thumbnail.isEmpty()) return null;
-
     const imgSize = thumbnail.getSize();
-
-    const cropX = Math.max(0, Math.min(region.x, imgSize.width - 1));
-    const cropY = Math.max(0, Math.min(region.y, imgSize.height - 1));
-    const cropW = Math.min(region.width, imgSize.width - cropX);
-    const cropH = Math.min(region.height, imgSize.height - cropY);
-
-    if (cropW <= 10 || cropH <= 10) return null;
-
-    const cropped = thumbnail.crop({
-      x: Math.round(cropX),
-      y: Math.round(cropY),
-      width: Math.round(cropW),
-      height: Math.round(cropH)
-    });
-
+    const scaleX = imgSize.width / sw;
+    const scaleY = imgSize.height / sh;
+    const cropX = Math.max(0, Math.round(region.x * scaleX));
+    const cropY = Math.max(0, Math.round(region.y * scaleY));
+    const cropW = Math.round(region.width * scaleX);
+    const cropH = Math.round(region.height * scaleY);
+    if (cropW < 10 || cropH < 10) return null;
+    const cropped = thumbnail.crop({ x: cropX, y: cropY, width: cropW, height: cropH });
     return cropped.toDataURL();
-  } catch (err) {
-    console.error('Screen capture error:', err.message);
-    return null;
-  }
+  } catch (e) { return null; }
 }
 
 async function captureFullScreen() {
   try {
+    const primary = screen.getPrimaryDisplay();
+    const { width: sw, height: sh } = primary.size;
     const sources = await desktopCapturer.getSources({
       types: ['screen'],
-      thumbnailSize: { width: 1920, height: 1080 }
+      thumbnailSize: { width: Math.min(sw, 2560), height: Math.min(sh, 1440) }
     });
-
     if (!sources || sources.length === 0) return null;
-
     const source = sources[settings.screenIndex] || sources[0];
     const thumbnail = source.thumbnail;
-
     if (!thumbnail || thumbnail.isEmpty()) return null;
-
     return thumbnail.toDataURL();
-  } catch (err) {
-    console.error('Full screen capture error:', err.message);
-    return null;
-  }
+  } catch (e) { return null; }
 }
 
-const OCR_API_KEY = process.env.OCR_API_KEY || '';
+const OCR_LANG_MAP = { en: 'eng', ja: 'jpn', ko: 'kor', zh: 'chs', fr: 'fre', de: 'ger', es: 'spa', ru: 'rus', ar: 'ara' };
 
 async function ocrWithAPI(imageDataUrl) {
   try {
-    if (!OCR_API_KEY) {
-      console.error('OCR API key is not set. Set the OCR_API_KEY environment variable.');
-      return '';
-    }
-    const base64Data = imageDataUrl.replace(/^data:image\/\w+;base64,/, '');
+    if (!OCR_API_KEY) return '';
+    const base64 = imageDataUrl.replace(/^data:image\/\w+;base64,/, '');
+    const ocrLang = OCR_LANG_MAP[settings.sourceLang] || 'eng';
+    const body = new URLSearchParams({
+      apikey: OCR_API_KEY,
+      base64Image: `data:image/png;base64,${base64}`,
+      language: ocrLang,
+      isOverlayRequired: 'false',
+      OCREngine: '2'
+    }).toString();
 
-    const response = await fetch('https://api.ocr.space/parse/image', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'apikey': OCR_API_KEY
-      },
-      body: `base64Image=data:image/png;base64,${base64Data}&language=eng&isOverlayRequired=false&OCREngine=2`
-    });
-
-    if (!response.ok) throw new Error(`OCR API error: ${response.status}`);
-
-    const data = await response.json();
+    const data = await httpPost('https://api.ocr.space/parse/image', {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'apikey': OCR_API_KEY
+    }, body);
 
     if (data && data.ParsedResults && data.ParsedResults.length > 0) {
       const text = data.ParsedResults[0].ParsedText;
-      if (text && text.trim().length > 0) {
-        return text.trim();
-      }
+      if (text && text.trim().length > 0) return text.trim();
     }
-
-    if (data && data.IsErroredOnProcessing) {
-      console.error('OCR processing error:', data.ErrorMessage);
-    }
-
     return '';
-  } catch (err) {
-    console.error('OCR API error:', err.message);
-    return '';
-  }
+  } catch (e) { return ''; }
 }
 
 async function translateText(text, from, to) {
   if (!text || text.length < 2) return '';
+  const cacheKey = `${from}|${to}|${text}`;
+  if (translationCache.has(cacheKey)) return translationCache.get(cacheKey);
 
   try {
-    const encoded = encodeURIComponent(text);
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encoded}`;
-
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const data = await response.json();
-
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
+    const data = await httpGet(url);
     if (data && data[0] && Array.isArray(data[0])) {
-      const translated = data[0]
-        .filter(item => item && item[0])
-        .map(item => item[0])
-        .join('');
-      if (translated.length > 0) return translated;
+      const translated = data[0].filter(item => item && item[0]).map(item => item[0]).join('').trim();
+      if (translated && translated.toLowerCase() !== text.toLowerCase()) {
+        translationCache.set(cacheKey, translated);
+        if (translationCache.size > 500) { const first = translationCache.keys().next().value; translationCache.delete(first); }
+        return translated;
+      }
     }
-
-    throw new Error('Empty translation result');
-  } catch (err) {
-    console.error('Google Translate error:', err.message);
-  }
+  } catch (e) {}
 
   try {
-    const encoded = encodeURIComponent(text);
-    const url = `https://api.mymemory.translated.net/get?q=${encoded}&langpair=${from}|${to}`;
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
-      const t = data.responseData.translatedText;
-      if (t && t !== text && t.length > 0) return t;
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`;
+    const data = await httpGet(url);
+    if (data && data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
+      const t = data.responseData.translatedText.trim();
+      if (t && t.toLowerCase() !== text.toLowerCase()) {
+        translationCache.set(cacheKey, t);
+        return t;
+      }
     }
-  } catch (err2) {
-    console.error('MyMemory error:', err2.message);
-  }
+  } catch (e) {}
 
-  try {
-    const encoded = encodeURIComponent(text);
-    const url = `https://translate.menti.ai/translate?text=${encoded}&source_lang=${from}&target_lang=${to}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    if (data && data.translated_text) return data.translated_text;
-  } catch (err3) {
-    console.error('Menti translate error:', err3.message);
-  }
+  return '';
+}
 
-  return `[ترجمة غير متوفرة] ${text}`;
+function textSimilarity(a, b) {
+  if (!a || !b) return 0;
+  const shorter = a.length < b.length ? a : b;
+  const longer = a.length < b.length ? b : a;
+  if (shorter === 0) return longer === 0 ? 1 : 0;
+  const shorterWords = new Set(shorter.split(' '));
+  const longerWords = longer.split(' ');
+  let match = 0;
+  for (const w of longerWords) { if (shorterWords.has(w)) match++; }
+  return match / longerWords.length;
+}
+
+function isDuplicate(cleanText) {
+  if (!lastTranslatedText) return false;
+  const similarity = textSimilarity(cleanText, lastTranslatedText);
+  return similarity > 0.85 && Math.abs(cleanText.length - lastTranslatedText.length) < 10;
 }
 
 async function processCapture() {
   if (!isTranslating) return;
-
   try {
     let imageData;
     if (settings.mode === 'region') {
@@ -182,62 +179,30 @@ async function processCapture() {
     } else {
       imageData = await captureFullScreen();
     }
-
-    if (!imageData) {
-      sendToRenderer({
-        original: '',
-        translated: '',
-        error: 'لا يمكن التقاط الشاشة — تأكد إن اللعبة شغالة'
-      });
-      return;
-    }
+    if (!imageData) { sendToRenderer({ original: '', translated: '' }); return; }
 
     const ocrText = await ocrWithAPI(imageData);
-
-    if (!ocrText || ocrText.length < 2) {
-      sendToRenderer({
-        original: '',
-        translated: '',
-        imageData
-      });
-      return;
-    }
+    if (!ocrText || ocrText.length < 2) { sendToRenderer({ original: '', translated: '', imageData }); return; }
 
     const cleanText = ocrText.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
 
-    if (cleanText === lastTranslatedText) {
-      return;
-    }
-
+    if (isDuplicate(cleanText)) return;
     lastTranslatedText = cleanText;
 
     const translated = await translateText(cleanText, settings.sourceLang, settings.targetLang);
+    if (!translated) return;
 
-    const result = {
-      original: cleanText,
-      translated,
-      imageData
-    };
-
+    const result = { original: cleanText, translated, imageData };
     sendToRenderer(result);
 
     translationHistory.unshift({
       original: cleanText.substring(0, 200),
       translated: translated.substring(0, 200),
-      time: new Date().toLocaleTimeString('ar')
+      time: new Date().toLocaleTimeString()
     });
-
-    if (translationHistory.length > 50) {
-      translationHistory = translationHistory.slice(0, 50);
-    }
-
-  } catch (err) {
-    console.error('Process capture error:', err.message);
-    sendToRenderer({
-      original: '',
-      translated: '',
-      error: `خطأ: ${err.message}`
-    });
+    if (translationHistory.length > 50) translationHistory = translationHistory.slice(0, 50);
+  } catch (e) {
+    sendToRenderer({ original: '', translated: '', error: e.message });
   }
 }
 
@@ -245,7 +210,6 @@ function sendToRenderer(data) {
   if (overlayWindow && !overlayWindow.isDestroyed()) {
     overlayWindow.webContents.send('translator-result', data);
   }
-
   if (global.mainWindow && !global.mainWindow.isDestroyed()) {
     global.mainWindow.webContents.send('translator-result', data);
   }
@@ -256,13 +220,11 @@ function createOverlayWindow() {
     overlayWindow.focus();
     return;
   }
-
-  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
-
+  const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
   overlayWindow = new BrowserWindow({
-    width: 450,
-    height: 250,
-    x: screenWidth - 470,
+    width: 500,
+    height: 180,
+    x: sw - 520,
     y: 40,
     frame: false,
     transparent: true,
@@ -276,13 +238,10 @@ function createOverlayWindow() {
       preload: path.join(__dirname, '..', '..', 'preload', 'preload.js')
     }
   });
-
   overlayWindow.loadFile(path.join(__dirname, '..', '..', 'renderer', 'overlay.html'));
   overlayWindow.setAlwaysOnTop(true, 'screen-saver');
-
-  overlayWindow.on('closed', () => {
-    overlayWindow = null;
-  });
+  overlayWindow.setIgnoreMouseEvents(true, { forward: true });
+  overlayWindow.on('closed', () => { overlayWindow = null; });
 }
 
 function closeOverlayWindow() {
@@ -293,27 +252,18 @@ function closeOverlayWindow() {
 }
 
 function startTranslation(customSettings) {
-  if (customSettings) {
-    settings = { ...settings, ...customSettings };
-  }
-
+  if (customSettings) settings = { ...settings, ...customSettings };
   isTranslating = true;
   lastTranslatedText = '';
-
   if (captureInterval) clearInterval(captureInterval);
-
   processCapture();
   captureInterval = setInterval(processCapture, settings.interval);
-
   return { status: 'started', settings };
 }
 
 function stopTranslation() {
   isTranslating = false;
-  if (captureInterval) {
-    clearInterval(captureInterval);
-    captureInterval = null;
-  }
+  if (captureInterval) { clearInterval(captureInterval); captureInterval = null; }
   lastTranslatedText = '';
   return { status: 'stopped' };
 }
@@ -321,22 +271,16 @@ function stopTranslation() {
 function getAvailableScreens() {
   return new Promise(async (resolve) => {
     try {
-      const sources = await desktopCapturer.getSources({
-        types: ['screen'],
-        thumbnailSize: { width: 100, height: 100 }
-      });
-
-      const screens = sources.map((s, i) => ({
-        id: s.id,
-        name: s.name,
+      const displays = screen.getAllDisplays();
+      resolve(displays.map((d, i) => ({
+        id: d.id.toString(),
+        name: `Screen ${i + 1}`,
         index: i,
-        width: s.thumbnail.getSize().width,
-        height: s.thumbnail.getSize().height
-      }));
-
-      resolve(screens);
-    } catch (err) {
-      resolve([{ id: 'primary', name: 'الشاشة الرئيسية', index: 0, width: 1920, height: 1080 }]);
+        width: d.size.width,
+        height: d.size.height
+      })));
+    } catch (e) {
+      resolve([{ id: 'primary', name: 'Main Screen', index: 0, width: 1920, height: 1080 }]);
     }
   });
 }
@@ -346,15 +290,8 @@ function updateSettings(newSettings) { settings = { ...settings, ...newSettings 
 function getHistory() { return translationHistory; }
 
 module.exports = {
-  createOverlayWindow,
-  closeOverlayWindow,
-  startTranslation,
-  stopTranslation,
-  getAvailableScreens,
-  getSettings,
-  updateSettings,
-  processCapture,
-  captureRegion,
-  captureFullScreen,
-  getHistory
+  createOverlayWindow, closeOverlayWindow,
+  startTranslation, stopTranslation,
+  getAvailableScreens, getSettings, updateSettings,
+  processCapture, getHistory
 };

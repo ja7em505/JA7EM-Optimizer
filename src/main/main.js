@@ -451,37 +451,37 @@ ipcMain.handle('translator-get-screens', async () => {
   return await gameTranslator.getAvailableScreens();
 });
 
-ipcMain.handle('translator-start', async (e, opts) => {
+ipcMain.handle('translator-start', requireLicense(async (e, opts) => {
   return gameTranslator.startTranslation(opts);
-});
+}));
 
 ipcMain.handle('translator-stop', async () => {
   return gameTranslator.stopTranslation();
 });
 
-ipcMain.handle('translator-update-settings', async (e, opts) => {
+ipcMain.handle('translator-update-settings', requireLicense(async (e, opts) => {
   return gameTranslator.updateSettings(opts);
-});
+}));
 
 ipcMain.handle('translator-get-settings', async () => {
   return gameTranslator.getSettings();
 });
 
-ipcMain.handle('translator-show-overlay', async () => {
+ipcMain.handle('translator-show-overlay', requireLicense(async () => {
   gameTranslator.createOverlayWindow();
   return { status: 'shown' };
-});
+}));
 
 ipcMain.handle('translator-hide-overlay', async () => {
   gameTranslator.closeOverlayWindow();
   return { status: 'hidden' };
 });
 
-ipcMain.handle('translator-capture-once', async (e, opts) => {
+ipcMain.handle('translator-capture-once', requireLicense(async (e, opts) => {
   if (opts) gameTranslator.updateSettings(opts);
   await gameTranslator.processCapture();
   return { status: 'captured' };
-});
+}));
 
 ipcMain.handle('translator-get-history', async () => {
   return gameTranslator.getHistory();

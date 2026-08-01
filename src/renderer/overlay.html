@@ -2,110 +2,85 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>مترجم الألعاب</title>
+  <title>Game Translator</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      background: rgba(10, 10, 30, 0.93);
-      color: #e8e8ff;
-      border-radius: 14px;
-      overflow: hidden;
-      border: 1px solid rgba(0, 200, 255, 0.2);
-      box-shadow: 0 0 30px rgba(0, 200, 255, 0.1);
-      user-select: none;
-      -webkit-app-region: drag;
+      font-family:'Segoe UI','Cairo',Tahoma,sans-serif;
+      background:rgba(6,6,20,0.94);
+      border-radius:10px; overflow:hidden;
+      border:1px solid rgba(0,212,255,0.25);
+      box-shadow:0 0 24px rgba(0,212,255,0.12);
+      user-select:none;
     }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 14px;
-      background: linear-gradient(90deg, rgba(0, 200, 255, 0.08), rgba(170, 68, 255, 0.05));
-      border-bottom: 1px solid rgba(0, 200, 255, 0.15);
+    .bar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:6px 10px; font-size:10px;
+      background:linear-gradient(90deg,rgba(0,212,255,0.1),rgba(140,68,255,0.06));
+      border-bottom:1px solid rgba(0,212,255,0.12);
+      -webkit-app-region:drag;
     }
-    .title {
-      font-size: 11px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #00c8ff, #aa44ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: 1px;
+    .bar span { color:#00d4ff; font-weight:700; letter-spacing:1px; }
+    .bar button {
+      width:20px; height:20px; border:none; border-radius:5px;
+      background:rgba(255,51,102,0.15); color:#ff3366;
+      font-size:11px; cursor:pointer; -webkit-app-region:no-drag;
+      display:flex; align-items:center; justify-content:center;
     }
-    .close-btn {
-      width: 22px; height: 22px; border: none; border-radius: 6px;
-      background: rgba(255, 51, 102, 0.15); color: #ff3366;
-      font-size: 12px; cursor: pointer; -webkit-app-region: no-drag;
-      display: flex; align-items: center; justify-content: center;
+    .bar button:hover { background:rgba(255,51,102,0.35); }
+    .main {
+      padding:12px; -webkit-app-region:no-drag;
+      min-height:60px; display:flex; align-items:center;
     }
-    .close-btn:hover { background: rgba(255, 51, 102, 0.3); }
-    .body {
-      padding: 14px; -webkit-app-region: no-drag;
-      max-height: 200px; overflow-y: auto;
+    .text {
+      font-size:18px; font-weight:700; color:#e0e0ff;
+      line-height:1.7; width:100%;
+      text-shadow:0 0 6px rgba(0,212,255,0.2);
     }
-    .original {
-      font-size: 11px; color: #8888bb; margin-bottom: 8px;
-      padding: 8px; background: rgba(255,255,255,0.03);
-      border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);
-      direction: ltr; text-align: left; line-height: 1.5;
-      display: none;
-    }
-    .original.show { display: block; }
-    .translated {
-      font-size: 16px; font-weight: 600; color: #00e5ff;
-      padding: 12px;
-      background: linear-gradient(135deg, rgba(0,200,255,0.06), rgba(170,68,255,0.04));
-      border-radius: 10px; border: 1px solid rgba(0,200,255,0.15);
-      line-height: 1.8; min-height: 40px;
-      text-shadow: 0 0 8px rgba(0,200,255,0.2);
-    }
-    .translated.waiting { color: #555577; font-size: 13px; font-weight: 400; }
-    .translated.error { color: #ff3366; font-size: 12px; }
+    .text.waiting { color:#555; font-size:14px; font-weight:400; text-shadow:none; }
+    .text.error { color:#ff3366; font-size:13px; font-weight:400; }
     .footer {
-      display: flex; align-items: center; gap: 6px;
-      padding: 6px 14px; font-size: 10px; color: #00ff88;
-      border-top: 1px solid rgba(0,200,255,0.1);
+      display:flex; align-items:center; gap:6px;
+      padding:5px 10px; font-size:9px; color:#00ff88;
+      border-top:1px solid rgba(0,212,255,0.08);
     }
-    .dot {
-      width: 6px; height: 6px; border-radius: 50%; background: #00ff88;
-      box-shadow: 0 0 8px rgba(0,255,136,0.5);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    .dot.off { background: #ff3366; box-shadow: 0 0 8px rgba(255,51,102,0.5); }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#00c8ff,#aa44ff); border-radius: 3px; }
+    .dot { width:6px; height:6px; border-radius:50%; background:#00ff88; box-shadow:0 0 6px rgba(0,255,136,0.6); }
+    .dot.waiting { background:#ffaa00; box-shadow:0 0 6px rgba(255,170,0,0.6); }
+    .dot.error { background:#ff3366; box-shadow:0 0 6px rgba(255,51,102,0.6); }
+    ::-webkit-scrollbar { width:3px; }
+    ::-webkit-scrollbar-thumb { background:linear-gradient(180deg,#00d4ff,#8c44ff); border-radius:3px; }
   </style>
 </head>
 <body>
-  <div class="header">
-    <span class="title">GAME TRANSLATOR</span>
-    <button class="close-btn" onclick="window.close()">✕</button>
+  <div class="bar">
+    <span>TRANSLATOR</span>
+    <button onclick="window.close()">&#10005;</button>
   </div>
-  <div class="body">
-    <div class="original" id="orig"></div>
-    <div class="translated waiting" id="trans">جاري بدء الترجمة...</div>
+  <div class="main">
+    <div class="text waiting" id="text">Waiting for game text...</div>
   </div>
   <div class="footer">
     <div class="dot" id="dot"></div>
-    <span id="status">نشط</span>
+    <span id="status">Active</span>
   </div>
   <script>
-    if (window.api && window.api.onTranslatorResult) {
-      window.api.onTranslatorResult(d => {
-        const o = document.getElementById('orig');
-        const t = document.getElementById('trans');
-        const dot = document.getElementById('dot');
-        const st = document.getElementById('status');
-        if (d.error) { t.textContent = d.error; t.className = 'translated error'; dot.classList.add('off'); st.textContent = 'خطأ'; return; }
-        if (d.original && d.original.length > 0) { o.textContent = d.original; o.classList.add('show'); }
-        else { o.classList.remove('show'); }
-        if (d.translated && d.translated.length > 0 && !d.translated.startsWith('[ترجمة')) {
-          t.textContent = d.translated; t.className = 'translated'; dot.classList.remove('off'); st.textContent = 'نشط — ترجمة مباشرة';
-        } else if (d.translated && d.translated.startsWith('[ترجمة')) {
-          t.textContent = d.translated; t.className = 'translated error';
+    if (window.electronAPI && window.electronAPI.onTranslatorResult) {
+      window.electronAPI.onTranslatorResult(function(d) {
+        var t = document.getElementById('text');
+        var dot = document.getElementById('dot');
+        var st = document.getElementById('status');
+        if (d.error) {
+          t.textContent = d.error; t.className = 'text error';
+          dot.className = 'dot error'; st.textContent = 'Error';
+          return;
+        }
+        if (d.translated && d.translated.length > 2 && d.translated.indexOf('\u062A\u0631\u062C\u0645\u0629') === -1) {
+          t.textContent = d.translated; t.className = 'text';
+          dot.className = 'dot'; st.textContent = 'Live';
         } else {
-          t.textContent = 'لا يوجد نص — حرّك المنطقة على النص في اللعبة'; t.className = 'translated waiting';
+          t.textContent = '\u064A\u0646\u062A\u0638\u0631 \u0627\u0644\u0646\u0635...';
+          t.className = 'text waiting';
+          dot.className = 'dot waiting'; st.textContent = 'Scanning...';
         }
       });
     }
