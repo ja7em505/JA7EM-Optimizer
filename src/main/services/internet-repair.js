@@ -40,19 +40,22 @@ async function resetWinsock() {
 async function flushDNS() {
   const fixes = [];
   try {
-    await runPs('ipconfig /flushdns', 30000);
+    const out = await runPs('ipconfig /flushdns', 30000);
+    if (out.includes('requires elevation') || out.includes('Access is denied') || out.includes('Run as administrator')) throw new Error('requires admin');
     fixes.push({ name: 'تفريغ DNS Cache', status: 'success' });
   } catch (e) {
     fixes.push({ name: 'تفريغ DNS Cache', status: 'failed', error: e.message });
   }
   try {
-    await runPs('ipconfig /release', 30000);
+    const out = await runPs('ipconfig /release', 30000);
+    if (out.includes('requires elevation') || out.includes('Access is denied') || out.includes('Run as administrator')) throw new Error('requires admin');
     fixes.push({ name: 'إطلاق IP', status: 'success' });
   } catch (e) {
     fixes.push({ name: 'إطلاق IP', status: 'failed', error: e.message });
   }
   try {
-    await runPs('ipconfig /renew', 60000);
+    const out = await runPs('ipconfig /renew', 60000);
+    if (out.includes('requires elevation') || out.includes('Access is denied') || out.includes('Run as administrator')) throw new Error('requires admin');
     fixes.push({ name: 'تجديد IP', status: 'success' });
   } catch (e) {
     fixes.push({ name: 'تجديد IP', status: 'failed', error: e.message });
