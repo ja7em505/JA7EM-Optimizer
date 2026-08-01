@@ -263,5 +263,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   startFpsOverlay: () => ipcRenderer.invoke('start-fps-overlay'),
   stopFpsOverlay: () => ipcRenderer.invoke('stop-fps-overlay'),
   isFpsOverlayRunning: () => ipcRenderer.invoke('is-fps-overlay-running'),
-  toggleOverlayMouse: (passthrough) => ipcRenderer.invoke('toggle-overlay-mouse', passthrough)
+  toggleOverlayMouse: (passthrough) => ipcRenderer.invoke('toggle-overlay-mouse', passthrough),
+
+  openRegionSelector: () => ipcRenderer.invoke('open-region-selector'),
+  regionSelected: (region) => ipcRenderer.send('region-selected', region)
 });

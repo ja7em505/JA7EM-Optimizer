@@ -486,3 +486,32 @@ ipcMain.handle('translator-capture-once', requireLicense(async (e, opts) => {
 ipcMain.handle('translator-get-history', async () => {
   return gameTranslator.getHistory();
 });
+
+let regionResolve = null;
+ipcMain.handle('open-region-selector', async () => {
+  return new Promise((resolve) => {
+    regionResolve = resolve;
+    const { screen } = require('electron');
+    const { width, height } = screen.getPrimaryDisplay().size;
+    const regionWin = new BrowserWindow({
+      width, height, x: 0, y: 0,
+      frame: false, transparent: true, alwaysOnTop: true,
+      skipTaskbar: true, resizable: false, hasShadow: false,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        preload: path.join(__dirname, '../preload/preload.js')
+      }
+    });
+    regionWin.loadFile(path.join(__dirname, '../renderer/region-selector.html'));
+    regionWin.setAlwaysOnTop(true, 'screen-saver');
+    regionWin.setFullScreen(true);
+    regionWin.on('closed', () => {
+      if (regionResolve) { regionResolve(null); regionResolve = null; }
+    });
+  });
+});
+
+ipcMain.on('region-selected', (e, region) => {
+  if (regionResolve) { regionResolve(region); regionResolve = null; }
+});

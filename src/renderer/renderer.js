@@ -228,6 +228,38 @@ async function loadAppVersion() {
   } catch (e) {}
 }
 
+async function checkForUpdates() {
+  const btn = document.getElementById('check-update-btn');
+  if (btn) { btn.textContent = '⏳ Checking...'; btn.disabled = true; }
+  try {
+    const result = await window.electronAPI.checkForUpdates();
+    if (result && result.version) {
+      showToast('Update found: v' + result.version, 'info');
+    } else {
+      showToast('You are already up to date', 'info');
+    }
+  } catch (e) {
+    showToast('Update check failed', 'info');
+  } finally {
+    if (btn) { btn.textContent = '🔄 Check Update'; btn.disabled = false; }
+  }
+}
+
+async function selectRegion() {
+  try {
+    const region = await window.electronAPI.openRegionSelector();
+    if (region) {
+      document.getElementById('regionX').value = region.x;
+      document.getElementById('regionY').value = region.y;
+      document.getElementById('regionW').value = region.width;
+      document.getElementById('regionH').value = region.height;
+      showToast('Region selected: ' + region.width + 'x' + region.height);
+    }
+  } catch (e) {
+    showToast('Region selection cancelled');
+  }
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => { checkLicense(); loadAppVersion(); });
 } else {
