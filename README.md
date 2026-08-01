@@ -2,195 +2,195 @@
 
 # 🚀 CJ Optimizer
 
-**The All-in-One PC Gaming Optimizer — Boost FPS, Clean Your System, Repair & Monitor Everything**
+**أداة تحسين الألعاب الشاملة — ارفع FPS، نظف جهازك، أصلح ويندوز، وراقب كل شي**
 
-![Version](https://img.shields.io/badge/version-1.1.6-5865F2)
-![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-00A4EF)
+![الإصدار](https://img.shields.io/badge/الإصدار-1.0.1-5865F2)
+![النظام](https://img.shields.io/badge/النظام-Windows%2010%2F11-00A4EF)
 ![Electron](https://img.shields.io/badge/Electron-37-green)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![الترخيص](https://img.shields.io/badge/الترخيص-MIT-blue)
 
-> ⚡ One tool. Every tweak. Maximum performance. 🎮
+> ⚡ أداة واحدة. كل التحسينات. أقصى أداء. 🎮
 
 </div>
 
 ---
 
-## 📖 About
+## 📖 عن الأداة
 
-**CJ Optimizer** is a powerful, all-in-one optimization suite for Windows built with Electron. It gives gamers and everyday users everything they need to **boost FPS**, **clean up junk**, **repair Windows**, and **monitor system health** — all from one beautiful, easy-to-use interface.
+**CJ Optimizer** هو حزمة تحسين شاملة لويندوز، مبنية بتقنية Electron. بيعطي اللاعبين والمستخدمين كل اللي بحتاجوه عشان **يرفعوا FPS**، **ينظفوا الملفات المؤقتة**، **يصلحوا ويندوز**، و**يراقبوا صحة الجهاز** — كله من واجهة وحدة، جميلة وسهلة الاستخدام.
 
-No more jumping between 10 different tools. Everything is here. 🛠️
-
----
-
-## ✨ Key Features
-
-### ⚡ Performance & FPS
-- **FPS Boost** — one-click registry & process tweaks for higher FPS
-- **Game Mode** — focus all system resources on your game
-- **Auto Memory Cleaner** — automatically keeps your RAM free
-- **RAM Optimizer** — manual memory cleanup on demand
-- **FPS Overlay** — see your FPS in-game, in real time
-- **Game FPS Profiles** — save & load per-game performance profiles
-- **GPU Optimizer** — tune your graphics card for gaming
-- **CPU Benchmark** — test your processor's power
-- **SSD Optimizer** — tweaks to keep your SSD fast
-- **Power Plans** — create the perfect gaming power plan
-- **Visual Effects** — optimize Windows visuals for speed
-- **Input Lag Fixer** — reduce input delay in games
-- **Mouse Latency** — minimize mouse click/response lag
-
-### 🧹 System Cleanup
-- **System Cleaner** — remove junk, temp files & leftovers
-- **Browser Cleanup** — clear cache from all major browsers
-- **Duplicate Finder** — find & remove duplicate files
-- **Disk Analyzer** — see what's eating your storage
-- **Bloatware Remover** — uninstall unwanted pre-installed apps
-- **Startup Manager** — control what runs at boot
-- **App Uninstaller** — cleanly remove installed programs
-- **Windows Apps Uninstaller** — remove Store & provisioned apps
-
-### 🛠️ System Repair
-- **Windows Repair** — SFC, DISM, registry & DLL fixes
-- **Internet Repair** — reset TCP/IP, Winsock, DNS & firewall
-- **Network Optimizer** — DNS, QoS & TCP tweaks for lower ping
-- **Network Turbo** — maximum network throughput
-- **Windows Update Blocker** — take control of updates
-- **BSOD Analyzer** — read & understand blue screen crashes
-- **Restore Points** — create & restore system backups
-
-### 🛡️ Security & Privacy
-- **Defender Manager** — full control over Windows Defender
-- **Privacy Tweaks** — stop Windows from tracking you
-- **Network Manager** — block unknown devices from your Wi-Fi
-
-### 🌐 Networking & Monitoring
-- **Speed Test** — test your internet speed
-- **Wi-Fi Analyzer** — scan & inspect nearby networks
-- **Ping Monitor** — measure latency to any server
-- **Network Monitor** — live connections & stats
-- **System Monitor** — CPU, RAM & live performance stats
-- **Temperature Monitor** — keep an eye on your CPU/GPU temps
-- **Process Manager** — see & control every running process
-- **Service Manager** — manage Windows services
-- **Disk Health** — check drive health & SMART data
-- **Context Menu Manager** — clean & customize right-click menus
-
-### 🎮 Gaming Extras
-- **Game Translation** 🌍 — translate your games in real time using OCR
-- **Game Settings Presets** — apply the best settings per game
-- **Stutter Fix** — eliminate micro-stutters
-- **Discord Rich Presence** — show CJ Optimizer on your Discord profile
+ولا بعد ترجع تتنقل بين 10 برامج مختلفة. كل شي هون. 🛠️
 
 ---
 
-## 📸 Screenshots
+## ✨ الميزات الرئيسية
 
-> Coming soon... stay tuned! 👀
+### ⚡ الأداء والـ FPS
+- **رفع FPS** — تعديلات الريجستري والعمليات بنقرة وحدة لرفع FPS
+- **وضع الألعاب** — تركيز كل موارد النظام على لعبتك
+- **منظف ذاكرة تلقائي** — بيحافظ على الرام فاضي تلقائياً
+- **محسن الرام** — تنظيف يدوي للذاكرة عند الطلب
+- **عداد FPS** — تابع FPS في اللعبة بشكل حي
+- **ملفات FPS للألعاب** — حفظ وتحميل إعدادات الأداء لكل لعبة
+- **محسن كرت الشاشة** — ضبط كرت الشاشة للألعاب
+- **اختبار المعالج** — اختبر قوة المعالج عندك
+- **محسن SSD** — تعديلات لتسريع الهارد
+- **خطط الطاقة** — إنشاء خطة طاقة مثالية للألعاب
+- **المؤثرات البصرية** — تحسين مظهر ويندوز للسرعة
+- **مصلح تأخير الإدخال** — تقليل زمن الاستجابة في الألعاب
+- **تأخير الماوس** — تقليل زمن استجابة النقر والحركة
+
+### 🧹 تنظيف الجهاز
+- **منظف النظام** — إزالة الملفات المؤقتة والزبالة
+- **تنظيف المتصفحات** — مسح الكاش من كل المتصفحات
+- **الباحث عن المكررات** — اكتشاف وحذف الملفات المكررة
+- **محلل المساحة** — شوف شو اللي ماخد مساحة التخزين
+- **مزيل البرامج المثبتة** — حذف التطبيقات اللي جاية مع النظام
+- **مدير بدء التشغيل** — تحكم بالبرامج اللي بتشتغل مع الإقلاع
+- **حذف التطبيقات** — إزالة البرامج المثبتة بشكل نظيف
+- **حذف تطبيقات المتجر** — إزالة تطبيقات متجر ويندوز
+
+### 🛠️ إصلاح النظام
+- **إصلاح ويندوز** — SFC, DISM، إصلاح الريجستري وملفات DLL
+- **إصلاح الإنترنت** — إعادة ضبط TCP/IP, Winsock, DNS وجدار الحماية
+- **محسن الشبكة** — DNS, QoS وتعديلات TCP لتحسين البينق
+- **توربو الشبكة** — أقصى سرعة للإنترنت
+- **مانع تحديثات ويندوز** — تحكم كامل بالتحديثات
+- **محلل الشاشة الزرقاء** — قراءة وفهم أعطال الشاشة الزرقاء
+- **نقاط الاستعادة** — إنشاء واسترجاع نسخ احتياطية للنظام
+
+### 🛡️ الأمان والخصوصية
+- **مدير الحماية** — تحكم كامل في Windows Defender
+- **تعديلات الخصوصية** — منع ويندوز من تتبعك
+- **مدير الشبكة** — حظر الأجهزة المشبوهة من الواي فاي
+
+### 🌐 الشبكات والمراقبة
+- **فحص السرعة** — اختبر سرعة الإنترنت عندك
+- **محلل الواي فاي** — افحص الشبكات القريبة وتفاصيلها
+- **مراقب البينق** — قياس زمن الاستجابة لأي سيرفر
+- **مراقب الشبكة** — الاتصالات الحية والإحصائيات
+- **مراقب النظام** — أداء المعالج والرام اللحظي
+- **مراقب الحرارة** — تابع حرارة المعالج وكرت الشاشة
+- **مدير العمليات** — شوف وتحكم بكل عملية شغالة
+- **مدير الخدمات** — إدارة خدمات ويندوز
+- **صحة الهارد** — فحص حالة الأقراص وبيانات SMART
+- **مدير قائمة النقر** — تنظيف وتخصيص قائمة النقر باليمين
+
+### 🎮 إضافات الألعاب
+- **ترجمة الألعاب** 🌍 — ترجمة ألعابك لحظياً باستخدام OCR
+- **إعدادات مسبقة للألعاب** — طبق أفضل الإعدادات لكل لعبة
+- **مصلح التقطيع** — التخلص من التقطيع المفاجئ
+- **Discord Rich Presence** — أظهر CJ Optimizer بملفك على Discord
 
 ---
 
-## 📥 Download & Install
+## 📸 صور من البرنامج
 
-### Option 1: Installer (recommended)
-1. Go to the **[Releases](https://github.com/ja7em505/CJ-Optimizer/releases)** page
-2. Download the latest **`CJ-Optimizer-Setup-*.exe`**
-3. Run the installer and follow the steps ✅
-4. Launch **CJ Optimizer** from your Desktop or Start Menu
-
-### Option 2: Auto-Update 🔄
-The app supports automatic updates — new versions install themselves on quit. Always stay on the latest version!
-
-> ⚠️ **Note:** Windows SmartScreen may show a warning because the app is not code-signed. Click **"More info" → "Run anyway"** to proceed.
+> قريباً... تابعونا! 👀
 
 ---
 
-## 📋 System Requirements
+## 📥 تحميل وتثبيت
 
-| Requirement | Minimum |
+### الطريقة الأولى: التثبيت (مفضلة)
+1. روح لصفحة **[Releases](https://github.com/ja7em505/JA7EM-Optimizer/releases)**
+2. حمّل آخر نسخة **`CJ-Optimizer-Setup-*.exe`**
+3. شغّل المثبت واتبع الخطوات ✅
+4. افتح **CJ Optimizer** من سطح المكتب أو قائمة ابدأ
+
+### الطريقة الثانية: التحديث التلقائي 🔄
+الأداة بتدعم التحديث التلقائي — الإصدارات الجديدة بتثبت نفسها عند الإغلاق. ابقى دايماً على أحدث نسخة!
+
+> ⚠️ **ملاحظة:** Windows SmartScreen ممكن يطلع تحذير لأنه البرنامج مش موقّع. اضغط **"More info" → "Run anyway"** للمتابعة.
+
+---
+
+## 📋 متطلبات التشغيل
+
+| المتطلب | الحد الأدنى |
 |---|---|
-| 🖥️ OS | Windows 10 / 11 (64-bit) |
-| 🧠 RAM | 4 GB |
-| 💾 Storage | 300 MB free |
-| 🌐 Internet | Required for updates & online features |
+| 🖥️ النظام | Windows 10 / 11 (64-bit) |
+| 🧠 الذاكرة | 4 GB |
+| 💾 المساحة | 300 MB فاضي |
+| 🌐 إنترنت | مطلوب للتحديثات والميزات الإلكترونية |
 
 ---
 
-## 🧑‍💻 Development
+## 🧑‍💻 تطوير
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) 18+ (tested on v20)
+### المتطلبات
+- [Node.js](https://nodejs.org/) 18+ (تم اختباره على v20)
 - npm
 
-### Setup
+### الإعداد
 ```bash
-# 1️⃣ Clone the repository
-git clone https://github.com/ja7em505/CJ-Optimizer.git
-cd CJ-Optimizer
+# 1️⃣ استنساخ المستودع
+git clone https://github.com/ja7em505/JA7EM-Optimizer.git
+cd JA7EM-Optimizer
 
-# 2️⃣ Install dependencies
+# 2️⃣ تثبيت الحزم
 npm install
 
-# 3️⃣ Run in development mode
+# 3️⃣ تشغيل بوضع المطور
 npm run dev
 ```
 
-### Build the installer
+### بناء المثبت
 ```bash
-# Windows NSIS installer
+# مثبت ويندوز NSIS
 npm run build
 
-# Unpacked app (portable folder)
+# نسخة محمولة (مجلد)
 npm run pack
 ```
 
 ---
 
-## 📁 Project Structure
+## 📁 هيكل المشروع
 
 ```
-CJ-Optimizer/
+JA7EM-Optimizer/
 ├── src/
-│   ├── main/          # 🧠 Electron main process & services
-│   ├── preload/       # 🔗 Preload scripts (IPC bridge)
-│   └── renderer/      # 🎨 UI (HTML/CSS/JS)
-├── scripts/           # ⚙️ Build utilities
-├── assets/            # 🖼️ Icons & resources
-├── dist/              # 📦 Build output
+│   ├── main/          # 🧠 عملية Electron الرئيسية والخدمات
+│   ├── preload/       # 🔗 سكربتات الجسر (IPC bridge)
+│   └── renderer/      # 🎨 الواجهة (HTML/CSS/JS)
+├── scripts/           # ⚙️ أدوات البناء
+├── assets/            # 🖼️ الأيقونات والموارد
+├── dist/              # 📦 مخرجات البناء
 └── package.json
 ```
 
 ---
 
-## 🛠️ Built With
+## 🛠️ البرامج المستخدمة
 
-- **[Electron](https://www.electronjs.org/)** — Cross-platform desktop framework
-- **[electron-builder](https://www.electron.build/)** — Installer & packaging
-- **[electron-updater](https://www.electron.build/auto-update)** — Auto-updates
-- **[systeminformation](https://www.npmjs.com/package/systeminformation)** — Hardware monitoring
-- **[tesseract.js](https://tesseract.projectnaptha.com/)** — OCR for game translation
+- **[Electron](https://www.electronjs.org/)** — إطار تطبيقات سطح مكتب متعدد المنصات
+- **[electron-builder](https://www.electron.build/)** — بناء وتغليف
+- **[electron-updater](https://www.electron.build/auto-update)** — التحديث التلقائي
+- **[systeminformation](https://www.npmjs.com/package/systeminformation)** — مراقبة العتاد
+- **[tesseract.js](https://tesseract.projectnaptha.com/)** — OCR لترجمة الألعاب
 - **[discord-rpc](https://www.npmjs.com/package/discord-rpc)** — Discord Rich Presence
 
 ---
 
-## 🙏 Support
+## 🙏 الدعم
 
-- ⭐ Star this repo if you find it useful!
-- 🐛 Found a bug? [Open an issue](https://github.com/ja7em505/CJ-Optimizer/issues)
-- 💬 Have a feature request? We'd love to hear it!
+- ⭐ اعمل Star للمستودع إذا عجبك!
+- 🐛 لقيت خطأ؟ [افتح مشكلة](https://github.com/ja7em505/JA7EM-Optimizer/issues)
+- 💬 عندك اقتراح؟ حابين نسمعه!
 
 ---
 
-## 📄 License
+## 📄 الترخيص
 
-This project is licensed under the **MIT License**.
+المشروع مرخص تحت **ترخيص MIT**.
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by [CJ](https://github.com/ja7em505)**
+**تم بكل ❤️ من [CJ](https://github.com/ja7em505)**
 
-*Game on, lag off!* 🎮⚡
+*العب بدون تقطيع!* 🎮⚡
 
 </div>
