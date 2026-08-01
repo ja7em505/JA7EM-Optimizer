@@ -38,29 +38,36 @@ async function getRestorePoints() {
 async function createRestorePoint(description = 'CJ Restore Point') {
   try {
     try {
-      await runFireAndForget('powershell -Command "Enable-ComputerRestore -Drive \\"C:\\"" 2>$null', 10000);
+      await runPs('powershell -Command "Enable-ComputerRestore -Drive \\"C:\\" 2>$null"', 10000);
     } catch (e) { }
 
     try {
-      await runFireAndForget('powershell -Command "Checkpoint-Computer -Description \'' + description + '\' -RestorePointType MODIFY_SETTINGS"', 60000);
-      return { status: 'success', message: `تم إنشاء نقطة الاستعادة: ${description}` };
-    } catch (e) {
-      if (e.message && e.message.includes('15 minutes')) {
+      const output = await runPs('powershell -Command "Checkpoint-Computer -Description \'' + description + '\' -RestorePointType MODIFY_SETTINGS" 2>&1', 60000);
+      if (output.includes('15 minutes')) {
         return { status: 'failed', message: 'يجب الانتظار 15 دقيقة بين نقاط الاستعادة' };
       }
-      throw e;
+      return { status: 'success', message: `تم إنشاء نقطة الاستعادة: ${description}` };
+    } catch (e) {
+      const msg = e.message || '';
+      if (msg.includes('15 minutes')) {
+        return { status: 'failed', message: 'يجب الانتظار 15 دقيقة بين نقاط الاستعادة' };
+      }
+      if (msg.includes('Access denied') || msg.includes('elevation') || msg.includes('Administrator')) {
+        return { status: 'failed', message: 'يجب تشغيل البرنامج كمسؤول (Administrator)' };
+      }
+      return { status: 'failed', message: `فشل: ${msg.substring(0, 100)}` };
     }
   } catch (e) {
-    return { status: 'failed', message: `فشل إنشاء نقطة الاستعادة: ${e.message}` };
+    return { status: 'failed', message: `فشل إنشاء نقطة الاستعادة` };
   }
 }
 
 async function restoreToPoint(sequenceNumber) {
   try {
-    await runFireAndForget(`powershell -Command "Restore-Computer -RestorePoint ${sequenceNumber} -Confirm:\$false"`, 60000);
+    await runPs(`powershell -Command "Restore-Computer -RestorePoint ${sequenceNumber} -Confirm:\$false"`, 60000);
     return { status: 'success', message: 'تم بدء عملية الاستعادة - الجهاز سيُعاد تشغيله' };
   } catch (e) {
-    return { status: 'failed', message: `فشل الاستعادة: ${e.message}` };
+    return { status: 'failed', message: `فشل الاستعادة - تأكد من تشغيل البرنامج كمسؤول` };
   }
 }
 
@@ -75,10 +82,10 @@ async function getRestoreStatus() {
 
 async function enableRestore(drive = 'C:') {
   try {
-    await runFireAndForget(`powershell -Command "Enable-ComputerRestore -Drive \\"${drive}:\\""`, 15000);
+    await runPs(`powershell -Command "Enable-ComputerRestore -Drive \\"${drive}:\\""`, 15000);
     return { status: 'success', message: `تم تفعيل نقطة الاستعادة على القرص ${drive}` };
   } catch (e) {
-    return { status: 'failed', message: `فشل: ${e.message}` };
+    return { status: 'failed', message: `فشل التفعيل - تأكد من تشغيل البرنامج كمسؤول` };
   }
 }
 
