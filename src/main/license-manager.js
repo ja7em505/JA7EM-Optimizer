@@ -246,6 +246,7 @@ async function validateLicense(key) {
           return { valid: false, reason: 'max_devices_reached' };
         }
         keyEntry.devices.push(deviceId);
+        keyEntry.last_used = new Date().toISOString();
         gistData.keys = gistData.keys.map(k => k.hash === keyHash ? keyEntry : k);
         pushToGist(gistData).catch(() => {});
       }
