@@ -126,6 +126,7 @@ async function pushToGist(data) {
     return new Promise((resolve, reject) => {
       const options = {
         hostname: 'api.github.com',
+        port: 443,
         path: '/gists/' + GIST_ID,
         method: 'PATCH',
         headers: {
@@ -139,7 +140,15 @@ async function pushToGist(data) {
       const req = https.request(options, (res) => {
         let d = '';
         res.on('data', (chunk) => d += chunk);
-        res.on('end', () => { try { resolve(JSON.parse(d)); } catch(e) { resolve(null); } });
+        res.on('end', () => {
+          let body = null;
+          try { body = JSON.parse(d); } catch (e) {}
+          if (res.statusCode < 200 || res.statusCode >= 300) {
+            reject(new Error('Gist API ' + res.statusCode + ': ' + (body && body.message || 'write failed')));
+            return;
+          }
+          resolve(body);
+        });
       });
       req.on('error', reject);
       req.write(payload);
