@@ -40,22 +40,22 @@ async function resetWinsock() {
 async function flushDNS() {
   const fixes = [];
   try {
-    await runFireAndForget('ipconfig /flushdns', 30000);
+    await runPs('ipconfig /flushdns', 30000);
     fixes.push({ name: 'تفريغ DNS Cache', status: 'success' });
   } catch (e) {
-    fixes.push({ name: 'تفريغ DNS Cache', status: 'failed' });
+    fixes.push({ name: 'تفريغ DNS Cache', status: 'failed', error: e.message });
   }
   try {
-    await runFireAndForget('ipconfig /release', 30000);
+    await runPs('ipconfig /release', 30000);
     fixes.push({ name: 'إطلاق IP', status: 'success' });
   } catch (e) {
-    fixes.push({ name: 'إطلاق IP', status: 'failed' });
+    fixes.push({ name: 'إطلاق IP', status: 'failed', error: e.message });
   }
   try {
-    await runFireAndForget('ipconfig /renew', 60000);
+    await runPs('ipconfig /renew', 60000);
     fixes.push({ name: 'تجديد IP', status: 'success' });
   } catch (e) {
-    fixes.push({ name: 'تجديد IP', status: 'failed' });
+    fixes.push({ name: 'تجديد IP', status: 'failed', error: e.message });
   }
   return fixes;
 }

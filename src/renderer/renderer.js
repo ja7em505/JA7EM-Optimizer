@@ -912,7 +912,11 @@ async function cleanDNS() {
   showToast('جاري تنظيف DNS...');
   try {
     const result = await window.electronAPI.flushDns();
-    if (result && result.status === 'success') {
+    if (Array.isArray(result)) {
+      const failed = result.filter(r => r.status !== 'success');
+      if (failed.length === 0) showToast('تم تنظيف DNS Cache بنجاح');
+      else showToast('فشل: ' + failed.map(f => f.name).join('، '));
+    } else if (result && result.status === 'success') {
       showToast('تم تنظيف DNS Cache بنجاح');
     } else {
       showToast('فشل تنظيف DNS');
