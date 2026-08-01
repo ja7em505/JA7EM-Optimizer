@@ -1,4 +1,4 @@
-let currentPage = 'dashboard';
+﻿let currentPage = 'dashboard';
 let monitorInterval = null;
 let selectedPreset = 'balanced';
 let scannedGames = [];
@@ -146,7 +146,7 @@ async function activateLicense() {
       else if (result.reason === 'device_mismatch') errorMsg = 'This key is locked to a different device';
       else if (result.reason === 'device_banned') errorMsg = 'This device is banned';
       else if (result.reason === 'offline') errorMsg = 'Cannot verify key (offline). Try again later.';
-      else if (result.reason === 'invalid_format') errorMsg = 'Invalid key format. Use: JA7EM-XXXX-XXXX-XXXX';
+      else if (result.reason === 'invalid_format') errorMsg = 'Invalid key format. Use: CJ-XXXX-XXXX-XXXX';
       msgEl.innerHTML = '<div style="color:#ef4444; padding:8px; background:rgba(239,68,68,0.1); border-radius:6px;">' + errorMsg + '</div>';
     }
   } catch (e) {
@@ -173,8 +173,8 @@ async function deactivateLicense() {
 
 document.getElementById('license-key-input').addEventListener('input', function(e) {
   let val = e.target.value.toUpperCase().replace(/[^A-Z0-9\-]/g, '');
-  if (val.length > 0 && !val.startsWith('JA7EM-')) {
-    if (val.startsWith('JA7EM')) val = 'JA7EM-' + val.substring(5);
+  if (val.length > 0 && !val.startsWith('CJ-')) {
+    if (val.startsWith('CJ')) val = 'CJ-' + val.substring(5);
   }
   e.target.value = val;
 });
@@ -225,8 +225,8 @@ async function loadAppVersion() {
     if (!version) return;
     const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
     setText('app-version', 'v' + version);
-    setText('activity-version', 'JA7EM OPTIMIZER v' + version);
-    setText('footer-version', 'JA7EM OPTIMIZER v' + version);
+    setText('activity-version', 'CJ OPTIMIZER v' + version);
+    setText('footer-version', 'CJ OPTIMIZER v' + version);
   } catch (e) {}
 }
 
@@ -1566,7 +1566,7 @@ async function createNewRestorePoint() {
   const results = document.getElementById('restoreResults');
   showToast('جاري إنشاء نقطة الاستعادة...', 'info');
   try {
-    const res = await window.electronAPI.createRestorePoint('JA7EM Restore Point');
+    const res = await window.electronAPI.createRestorePoint('CJ Restore Point');
     const div = document.createElement('div');
     div.className = 'repair-result';
     div.innerHTML = `<span class="result-name">${res.message}</span><span class="result-status ${res.status}">${res.status === 'success' ? 'تم' : 'فشل'}</span>`;

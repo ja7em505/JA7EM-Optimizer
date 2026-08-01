@@ -1,4 +1,4 @@
-const { exec } = require('child_process');
+﻿const { exec } = require('child_process');
 const os = require('os');
 
 function runCmd(cmd, timeout = 15000) {
@@ -81,8 +81,8 @@ async function getDeviceDetails(ip) {
 
 async function blockDevice(ip) {
   try {
-    await runCmd(`netsh advfirewall firewall add rule name="JA7EM-Block-${ip}" dir=out action=block remoteip=${ip} enable=yes`);
-    await runCmd(`netsh advfirewall firewall add rule name="JA7EM-BlockIn-${ip}" dir=in action=block remoteip=${ip} enable=yes`);
+    await runCmd(`netsh advfirewall firewall add rule name="CJ-Block-${ip}" dir=out action=block remoteip=${ip} enable=yes`);
+    await runCmd(`netsh advfirewall firewall add rule name="CJ-BlockIn-${ip}" dir=in action=block remoteip=${ip} enable=yes`);
     return { success: true, message: `Device ${ip} blocked` };
   } catch (e) {
     return { success: false, message: e.message };
@@ -91,8 +91,8 @@ async function blockDevice(ip) {
 
 async function unblockDevice(ip) {
   try {
-    await runCmd(`netsh advfirewall firewall delete rule name="JA7EM-Block-${ip}"`);
-    await runCmd(`netsh advfirewall firewall delete rule name="JA7EM-BlockIn-${ip}"`);
+    await runCmd(`netsh advfirewall firewall delete rule name="CJ-Block-${ip}"`);
+    await runCmd(`netsh advfirewall firewall delete rule name="CJ-BlockIn-${ip}"`);
     return { success: true, message: `Device ${ip} unblocked` };
   } catch (e) {
     return { success: false, message: e.message };
@@ -102,7 +102,7 @@ async function unblockDevice(ip) {
 async function limitBandwidth(ip, speedMbps) {
   try {
     const bitsPerSec = speedMbps * 1024 * 1024;
-    await runCmd(`netsh advfirewall firewall add rule name="JA7EM-Limit-${ip}" dir=out action=allow remoteip=${ip} enable=yes`);
+    await runCmd(`netsh advfirewall firewall add rule name="CJ-Limit-${ip}" dir=out action=allow remoteip=${ip} enable=yes`);
     return { success: true, message: `Bandwidth limited to ${speedMbps} Mbps for ${ip}` };
   } catch (e) {
     return { success: false, message: e.message };
@@ -137,8 +137,8 @@ async function getBlockedDevices() {
     const blocked = [];
     const lines = output.split('\n');
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].includes('JA7EM-Block-') && !lines[i].includes('BlockIn')) {
-        const match = lines[i].match(/JA7EM-Block-(\d+\.\d+\.\d+\.\d+)/);
+      if (lines[i].includes('CJ-Block-') && !lines[i].includes('BlockIn')) {
+        const match = lines[i].match(/CJ-Block-(\d+\.\d+\.\d+\.\d+)/);
         if (match) blocked.push(match[1]);
       }
     }

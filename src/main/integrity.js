@@ -3,7 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { app } = require('electron');
 
-const CONFIG_DIR = path.join(process.env.APPDATA || process.env.HOME, 'JA7EM-Optimizer');
+const CONFIG_DIR = path.join(process.env.APPDATA || process.env.HOME, 'CJ-Optimizer');
 
 const expectedHash = require('./integrity-expected');
 
@@ -17,7 +17,7 @@ const PROTECTED_FILES = [
   'src/renderer/renderer.js'
 ];
 
-const HIDDEN_WATERMARKS = ['JA7EM_AUTHENTIC', 'LICENSED_SOFTWARE', 'INTEGRITY_CHECK'];
+const HIDDEN_WATERMARKS = ['CJ_AUTHENTIC', 'LICENSED_SOFTWARE', 'INTEGRITY_CHECK'];
 
 function getAppRoot() {
   if (app.isPackaged) return path.join(process.resourcesPath, 'app.asar');

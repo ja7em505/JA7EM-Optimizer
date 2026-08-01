@@ -1,7 +1,7 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 
-const PROFILES_FILE = path.join(process.env.APPDATA || process.env.HOME, 'JA7EM Optimizer', 'fps-profiles.json');
+const PROFILES_FILE = path.join(process.env.APPDATA || process.env.HOME, 'CJ Optimizer', 'fps-profiles.json');
 
 const DEFAULT_PROFILES = [
   {

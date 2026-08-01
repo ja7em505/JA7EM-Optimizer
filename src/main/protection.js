@@ -3,7 +3,7 @@ const path = require('path');
 const integrity = require('./integrity');
 const licenseManager = require('./license-manager');
 
-const CONFIG_DIR = path.join(process.env.APPDATA || process.env.HOME, 'JA7EM-Optimizer');
+const CONFIG_DIR = path.join(process.env.APPDATA || process.env.HOME, 'CJ-Optimizer');
 const MODLOG_FILE = path.join(CONFIG_DIR, 'modifications.log');
 const LOCK_FILE = path.join(CONFIG_DIR, 'lock.dat');
 

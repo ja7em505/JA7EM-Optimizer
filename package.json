@@ -1,19 +1,19 @@
 {
-    "name":  "ja7em-optimizer",
-    "version":  "1.1.15",
-    "description":  "JA7EM PC Optimizer - Boost FPS, Update Drivers, Clean System",
+    "name":  "JA7EM-Optimizer",
+    "version":  "1.1.16",
+    "description":  "CJ Optimizer - Boost FPS, Update Drivers, Clean System",
     "main":  "src/main/main.js",
     "scripts":  {
                     "start":  "electron .",
                     "dev":  "electron . --dev",
                     "build":  "electron-builder build --win --publish never",
                     "pack":  "electron-builder build --dir",
-                    "pack-portable":  "electron-packager . \"JA7EM Optimizer\" --platform=win32 --arch=x64 --icon=assets/icon.ico --overwrite --out=dist --asar",
+                    "pack-portable":  "electron-packager . \"CJ Optimizer\" --platform=win32 --arch=x64 --icon=assets/icon.ico --overwrite --out=dist --asar",
                     "obfuscate":  "node scripts/obfuscate.js",
                     "integrity":  "node scripts/gen-integrity.js",
                     "build-secure":  "node scripts/obfuscate.js && node scripts/gen-integrity.js && electron-builder build --win --publish never"
                 },
-    "author":  "JA7EM",
+    "author":  "CJ",
     "license":  "MIT",
     "devDependencies":  {
                             "electron":  "^37.0.0",
@@ -29,8 +29,8 @@
                          "tesseract.js":  "^7.0.0"
                      },
     "build":  {
-                  "appId":  "com.ja7em.optimizer",
-                  "productName":  "JA7EM Optimizer",
+                  "appId":  "com.cjteam.optimizer",
+                  "productName":  "CJ Optimizer",
                   "files":  [
                                "src/**/*",
                                "assets/**/*",

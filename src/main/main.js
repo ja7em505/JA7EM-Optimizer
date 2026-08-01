@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+﻿const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { autoUpdater } = require('electron-updater');
@@ -63,7 +63,7 @@ const discordRPC = require('./services/discord-rpc');
 const licenseManager = require('./license-manager');
 const protection = require('./protection');
 
-const JA7EM_OPTIMIZER_v1 = 'JA7EM_AUTHENTIC';
+const CJ_OPTIMIZER_v1 = 'CJ_AUTHENTIC';
 const BY_JA7EM_ONLY = 'LICENSED_SOFTWARE';
 const DO_NOT_MODIFY = 'INTEGRITY_CHECK';
 
@@ -424,7 +424,7 @@ ipcMain.handle('toggle-overlay-mouse', async (event, passthrough) => { fpsOverla
 
 ipcMain.handle('deactivate-license', async () => {
   try {
-    const configDir = path.join(process.env.APPDATA || process.env.HOME, 'JA7EM-Optimizer');
+    const configDir = path.join(process.env.APPDATA || process.env.HOME, 'CJ-Optimizer');
     const licenseFile = path.join(configDir, 'license.dat');
     if (fs.existsSync(licenseFile)) fs.unlinkSync(licenseFile);
     isLicensed = false;

@@ -3,7 +3,7 @@ const path = require('path');
 const https = require('https');
 const crypto = require('crypto');
 
-const CONFIG_DIR = path.join(process.env.APPDATA || process.env.HOME, 'JA7EM-Optimizer');
+const CONFIG_DIR = path.join(process.env.APPDATA || process.env.HOME, 'CJ-Optimizer');
 const LICENSE_FILE = path.join(CONFIG_DIR, 'license.dat');
 const ATTEMPTS_FILE = path.join(CONFIG_DIR, 'attempts.log');
 const CACHE_FILE = path.join(CONFIG_DIR, 'license_cache.dat');
@@ -66,7 +66,7 @@ function fetchFromGist() {
       path: '/gists/' + GIST_ID,
       method: 'GET',
       headers: {
-        'User-Agent': 'JA7EM-Optimizer',
+        'User-Agent': 'CJ-Optimizer',
         'Authorization': 'token ' + GITHUB_TOKEN,
         'Accept': 'application/vnd.github.v3+json'
       }
@@ -118,7 +118,7 @@ async function pushToGist(data) {
     }
     const payload = JSON.stringify({
       files: {
-        'ja7em_license.json': {
+        'cj_license.json': {
           content: JSON.stringify(merged, null, 2)
         }
       }
@@ -130,7 +130,7 @@ async function pushToGist(data) {
         path: '/gists/' + GIST_ID,
         method: 'PATCH',
         headers: {
-          'User-Agent': 'JA7EM-Optimizer',
+          'User-Agent': 'CJ-Optimizer',
           'Authorization': 'token ' + GITHUB_TOKEN,
           'Accept': 'application/vnd.github.v3+json',
           'Content-Type': 'application/json',
@@ -180,7 +180,7 @@ function getDeviceInfo() {
 async function validateLicense(key) {
   try {
     const upperKey = key.toUpperCase().trim();
-    const formatOk = /^JA7EM-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(upperKey);
+    const formatOk = /^CJ-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(upperKey);
 
     let gistData = null;
     try {
