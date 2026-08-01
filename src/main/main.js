@@ -64,7 +64,7 @@ const licenseManager = require('./license-manager');
 const protection = require('./protection');
 
 const CJ_OPTIMIZER_v1 = 'CJ_AUTHENTIC';
-const BY_JA7EM_ONLY = 'LICENSED_SOFTWARE';
+const BY_CJ_ONLY = 'LICENSED_SOFTWARE';
 const DO_NOT_MODIFY = 'INTEGRITY_CHECK';
 
 let mainWindow;

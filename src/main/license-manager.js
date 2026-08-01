@@ -52,7 +52,7 @@ function generateKey() {
     }
     segments.push(seg);
   }
-  return 'JA7EM-' + segments.join('-');
+  return 'CJ-' + segments.join('-');
 }
 
 function hashKey(key) {
