@@ -142,12 +142,7 @@ app.whenReady().then(async () => {
   }
   createWindow();
   isLicensed = licenseManager.isLicenseActive();
-  const securityResults = protection.initialize(mainWindow);
-  console.log('[SECURITY] Startup check:', JSON.stringify(securityResults));
-  if (securityResults.locked) {
-    setTimeout(() => app.exit(1), 1500);
-    return;
-  }
+  protection.initialize(mainWindow);
   protection.onViolation((reason) => {
     console.log('[SECURITY] Violation:', reason);
     setTimeout(() => { try { app.quit(); } catch (e) { app.exit(1); } }, 1800);
