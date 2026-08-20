@@ -1,6 +1,6 @@
 {
     "name": "cj-optimizer",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "CJ PC Optimizer - Boost FPS, Update Drivers, Clean System",
     "main": "src/main/main.js",
     "scripts": {
