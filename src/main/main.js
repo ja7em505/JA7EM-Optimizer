@@ -65,7 +65,7 @@ const protection = require('./protection');
 const CJ_OPTIMIZER_v1 = 'CJ_AUTHENTIC';
 const BY_CJ_ONLY = 'LICENSED_SOFTWARE';
 const DO_NOT_MODIFY = 'INTEGRITY_CHECK';
-const MAIN_CORE_HASH = '23062fa9b59256035dab1526eb9282aed12ef4ace871c5698bc60f4d23f1ef61';
+const MAIN_CORE_HASH = '46d642a11e288a32a07dbd06aaa8b2013ecf513807a3788ecf4354de033d3930';
 
 let mainWindow;
 let isLicensed = false;

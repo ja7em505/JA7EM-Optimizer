@@ -12,7 +12,10 @@ const BAN_FILE = path.join(CONFIG_DIR, 'ban.dat');
 const BAN_THRESHOLD = 5;
 const BAN_WINDOW_MS = 24 * 60 * 60 * 1000;
 
-const GIST_ID = '7770924e5e10b9094ba9099efc1d4f97';
+const REPO_OWNER = 'ja7em505';
+const REPO_NAME = 'license-data';
+const REPO_PATH = 'license.json';
+const REPO_API = '/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + REPO_PATH;
 const GITHUB_TOKEN = require('./license-token');
 
 const ENCRYPTION_KEY = crypto.createHash('sha256').update('JA7EM-OPTIMIZER-2024-SECURE-KEY').digest();
@@ -59,15 +62,15 @@ function hashKey(key) {
   return crypto.createHash('sha256').update(key.toUpperCase().trim()).digest('hex');
 }
 
-function fetchFromGist() {
+function apiGet(path) {
   return new Promise((resolve, reject) => {
     const options = {
       hostname: 'api.github.com',
-      path: '/gists/' + GIST_ID,
+      path: path,
       method: 'GET',
       headers: {
         'User-Agent': 'CJ-Optimizer',
-        'Authorization': 'token ' + GITHUB_TOKEN,
+        'Authorization': 'Bearer ' + GITHUB_TOKEN,
         'Accept': 'application/vnd.github.v3+json'
       }
     };
@@ -75,17 +78,8 @@ function fetchFromGist() {
       let data = '';
       res.on('data', (chunk) => data += chunk);
       res.on('end', () => {
-        try {
-          const gist = JSON.parse(data);
-          const files = Object.values(gist.files || {});
-          if (files.length > 0) {
-            resolve(JSON.parse(files[0].content));
-          } else {
-            resolve(null);
-          }
-        } catch (e) {
-          reject(e);
-        }
+        if (res.statusCode === 404) { resolve(null); return; }
+        try { resolve(JSON.parse(data)); } catch (e) { reject(e); }
       });
     });
     req.on('error', reject);
@@ -94,10 +88,63 @@ function fetchFromGist() {
   });
 }
 
+function apiPut(path, payload) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'api.github.com',
+      port: 443,
+      path: path,
+      method: 'PUT',
+      headers: {
+        'User-Agent': 'CJ-Optimizer',
+        'Authorization': 'Bearer ' + GITHUB_TOKEN,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
+      }
+    };
+    const req = https.request(options, (res) => {
+      let d = '';
+      res.on('data', (chunk) => d += chunk);
+      res.on('end', () => {
+        let body = null;
+        try { body = JSON.parse(d); } catch (e) {}
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          const err = new Error('Repo API ' + res.statusCode + ': ' + ((body && body.message) || 'write failed'));
+          err.status = res.statusCode;
+          reject(err);
+          return;
+        }
+        resolve(body);
+      });
+    });
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
+}
+
+function fetchFromGist() {
+  return new Promise((resolve, reject) => {
+    apiGet(REPO_API).then((file) => {
+      if (!file) { resolve(null); return; }
+      try {
+        resolve(JSON.parse(Buffer.from(file.content, 'base64').toString('utf8')));
+      } catch (e) { reject(e); }
+    }).catch(reject);
+  });
+}
+
+function getRepoFileSha() {
+  return apiGet(REPO_API).then(f => f ? f.sha : null);
+}
+
 async function pushToGist(data) {
   try {
     let existing = null;
     try { existing = await fetchFromGist(); } catch (e) {}
+    let sha = null;
+    try { sha = await getRepoFileSha(); } catch (e) {}
     let merged;
     if (existing && data.type === 'crack_attempts') {
       merged = { keys: existing.keys || [], crack_attempts: data.attempts || [], banned_devices: existing.banned_devices || [] };
@@ -116,44 +163,22 @@ async function pushToGist(data) {
     } else {
       merged = existing || { keys: [] };
     }
-    const payload = JSON.stringify({
-      files: {
-        'cj_license.json': {
-          content: JSON.stringify(merged, null, 2)
+    const content = Buffer.from(JSON.stringify(merged, null, 2), 'utf8').toString('base64');
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const putBody = { message: 'update license data', content: content };
+        if (sha) putBody.sha = sha;
+        await apiPut(REPO_API, JSON.stringify(putBody));
+        return true;
+      } catch (e) {
+        if (e.status === 409 && attempt < 2) {
+          try { sha = await getRepoFileSha(); } catch (e2) {}
+          continue;
         }
+        return null;
       }
-    });
-    return new Promise((resolve, reject) => {
-      const options = {
-        hostname: 'api.github.com',
-        port: 443,
-        path: '/gists/' + GIST_ID,
-        method: 'PATCH',
-        headers: {
-          'User-Agent': 'CJ-Optimizer',
-          'Authorization': 'token ' + GITHUB_TOKEN,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(payload)
-        }
-      };
-      const req = https.request(options, (res) => {
-        let d = '';
-        res.on('data', (chunk) => d += chunk);
-        res.on('end', () => {
-          let body = null;
-          try { body = JSON.parse(d); } catch (e) {}
-          if (res.statusCode < 200 || res.statusCode >= 300) {
-            reject(new Error('Gist API ' + res.statusCode + ': ' + (body && body.message || 'write failed')));
-            return;
-          }
-          resolve(body);
-        });
-      });
-      req.on('error', reject);
-      req.write(payload);
-      req.end();
-    });
+    }
+    return null;
   } catch (e) { return null; }
 }
 
