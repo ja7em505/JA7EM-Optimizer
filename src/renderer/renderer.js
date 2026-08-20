@@ -6,7 +6,7 @@ let isLicensed = false;
 let licenseCountdownInterval = null;
 let licenseStatus = null;
 
-const PAID_PAGES = ['fps', 'clean', 'winrepair', 'netrepair', 'gamemode', 'ram', 'stutter', 'drivers', 'power', 'restore', 'speedtest', 'gpu', 'mousefix', 'privacy', 'browsrclean', 'ctxmenu', 'gametranslator'];
+const PAID_PAGES = ['fps', 'clean', 'winrepair', 'netrepair', 'gamemode', 'ram', 'stutter', 'drivers', 'power', 'restore', 'speedtest', 'gpu', 'mousefix', 'privacy', 'browsrclean', 'ctxmenu'];
 
 function formatTimeRemaining(expiryDate) {
   if (!expiryDate) return { text: 'Unlimited', sub: 'No expiration', color: '#22c55e' };
@@ -246,21 +246,6 @@ async function checkForUpdates() {
   }
 }
 
-async function selectRegion() {
-  try {
-    const region = await window.electronAPI.openRegionSelector();
-    if (region) {
-      document.getElementById('regionX').value = region.x;
-      document.getElementById('regionY').value = region.y;
-      document.getElementById('regionW').value = region.width;
-      document.getElementById('regionH').value = region.height;
-      showToast('Region selected: ' + region.width + 'x' + region.height);
-    }
-  } catch (e) {
-    showToast('Region selection cancelled');
-  }
-}
-
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => { checkLicense(); loadAppVersion(); });
 } else {
@@ -339,7 +324,6 @@ function navigateTo(page) {
   if (page === 'temp') refreshTemps();
   if (page === 'ctxmenu') loadContextMenu();
   if (page === 'browsrclean') loadBrowserSizes();
-  if (page === 'gametranslator') loadTranslatorScreens();
 }
 
 function showToast(message, type = 'success') {
@@ -867,41 +851,6 @@ async function quickClean() {
   showToast('جاري التنظيف السريع...');
   await window.electronAPI.cleanSystem();
   showToast('تم التنظيف السريع');
-}
-
-// ==================== TRANSLATE ====================
-let translateHistory = [];
-
-async function translateText() {
-  const input = document.getElementById('translateInput').value.trim();
-  const from = document.getElementById('translateFrom').value;
-  const to = document.getElementById('translateTo').value;
-  if (!input) { showToast('الرجاء إدخال نص للترجمة', 'error'); return; }
-  showToast('جاري الترجمة...');
-  try {
-    const translated = await window.electronAPI.translateText(input, from, to);
-    document.getElementById('translateOutput').value = translated;
-    translateHistory.unshift({ original: input, translated: translated });
-    if (translateHistory.length > 10) translateHistory.pop();
-    updateTranslateHistory();
-    showToast('تمت الترجمة بنجاح');
-  } catch (error) {
-    showToast('فشلت الترجمة', 'error');
-  }
-}
-
-function updateTranslateHistory() {
-  const historyDiv = document.getElementById('translateHistory');
-  historyDiv.innerHTML = '';
-  translateHistory.forEach(item => {
-    const historyItem = document.createElement('div');
-    historyItem.className = 'history-item';
-    historyItem.innerHTML = `
-      <div class="history-original">${item.original}</div>
-      <div class="history-translated">${item.translated}</div>
-    `;
-    historyDiv.appendChild(historyItem);
-  });
 }
 
 // ==================== WINDOWS REPAIR ====================
@@ -2500,9 +2449,6 @@ async function revertMouse() {
   showToast('تمت إعادة الماوس', 'info');
 }
 
-// ==================== GAME TRANSLATOR ====================
-let translatorRunning = false;
-
 async function loadSsdTweaks() {
   try {
     const tweaks = await window.electronAPI.getSsdTweaks();
@@ -2812,192 +2758,6 @@ async function toggleOverlayMouseMode() {
   const passthrough = document.getElementById('overlayMousePassthrough').checked;
   try { await window.electronAPI.toggleOverlayMouse(passthrough); }
   catch (e) {}
-}
-
-async function loadTranslatorScreens() {
-  try {
-    const screens = await window.electronAPI.translatorGetScreens();
-    const sel = document.getElementById('translatorScreen');
-    if (!sel) return;
-    sel.innerHTML = '';
-    screens.forEach(s => {
-      const opt = document.createElement('option');
-      opt.value = s.index;
-      opt.textContent = `${s.name} (${s.width}x${s.height})`;
-      sel.appendChild(opt);
-    });
-  } catch (e) { console.error('Load screens error:', e); }
-}
-
-async function startGameTranslator() {
-  const btnStart = document.getElementById('btnStartTranslator');
-  const btnStop = document.getElementById('btnStopTranslator');
-  const statusEl = document.getElementById('translatorStatus');
-  const progressEl = document.getElementById('translatorProgress');
-
-  const mode = document.getElementById('translatorMode').value;
-  const screenIdx = parseInt(document.getElementById('translatorScreen').value);
-  const interval = parseInt(document.getElementById('translatorInterval').value);
-  const from = document.getElementById('translatorFrom').value;
-  const to = document.getElementById('translatorTo').value;
-  const regionX = parseInt(document.getElementById('regionX').value) || 0;
-  const regionY = parseInt(document.getElementById('regionY').value) || 0;
-  const regionW = parseInt(document.getElementById('regionW').value) || 500;
-  const regionH = parseInt(document.getElementById('regionH').value) || 200;
-
-  const opts = {
-    mode,
-    screenIndex: screenIdx,
-    interval,
-    sourceLang: from,
-    targetLang: to,
-    region: { x: regionX, y: regionY, width: regionW, height: regionH }
-  };
-
-  try {
-    await window.electronAPI.translatorStart(opts);
-    translatorRunning = true;
-    btnStart.style.display = 'none';
-    btnStop.style.display = 'flex';
-    statusEl.textContent = 'نشط';
-    statusEl.style.background = 'rgba(0,255,136,0.1)';
-    statusEl.style.color = '#00ff88';
-    progressEl.style.display = 'block';
-    document.getElementById('translatorText').textContent = 'جاري ترجمة النصوص...';
-    showToast('بدأت الترجمة المباشرة', 'success');
-  } catch (e) {
-    showToast('خطأ في بدء الترجمة', 'error');
-  }
-}
-
-async function stopGameTranslator() {
-  const btnStart = document.getElementById('btnStartTranslator');
-  const btnStop = document.getElementById('btnStopTranslator');
-  const statusEl = document.getElementById('translatorStatus');
-  const progressEl = document.getElementById('translatorProgress');
-
-  try {
-    await window.electronAPI.translatorStop();
-    translatorRunning = false;
-    btnStart.style.display = 'flex';
-    btnStop.style.display = 'none';
-    statusEl.textContent = 'متوقف';
-    statusEl.style.background = 'rgba(255,51,102,0.1)';
-    statusEl.style.color = '#ff3366';
-    progressEl.style.display = 'none';
-    showToast('تم إيقاف الترجمة', 'info');
-  } catch (e) {
-    showToast('خطأ في الإيقاف', 'error');
-  }
-}
-
-async function translatorCaptureOnce() {
-  const mode = document.getElementById('translatorMode').value;
-  const screenIdx = parseInt(document.getElementById('translatorScreen').value);
-  const from = document.getElementById('translatorFrom').value;
-  const to = document.getElementById('translatorTo').value;
-  const regionX = parseInt(document.getElementById('regionX').value) || 0;
-  const regionY = parseInt(document.getElementById('regionY').value) || 0;
-  const regionW = parseInt(document.getElementById('regionW').value) || 500;
-  const regionH = parseInt(document.getElementById('regionH').value) || 200;
-
-  const opts = {
-    mode,
-    screenIndex: screenIdx,
-    sourceLang: from,
-    targetLang: to,
-    region: { x: regionX, y: regionY, width: regionW, height: regionH }
-  };
-
-  const statusEl = document.getElementById('translatorStatus');
-  statusEl.textContent = 'جاري...';
-  statusEl.style.background = 'rgba(255,149,0,0.1)';
-  statusEl.style.color = '#ff9500';
-
-  try {
-    await window.electronAPI.translatorCaptureOnce(opts);
-  } catch (e) {
-    statusEl.textContent = 'خطأ';
-    statusEl.style.background = 'rgba(255,51,102,0.1)';
-    statusEl.style.color = '#ff3366';
-    showToast('خطأ في التقاط الشاشة', 'error');
-  }
-}
-
-async function showTranslatorOverlay() {
-  try {
-    await window.electronAPI.translatorShowOverlay();
-    document.getElementById('btnShowOverlay').style.display = 'none';
-    document.getElementById('btnHideOverlay').style.display = 'flex';
-  } catch (e) {
-    showToast('خطأ في إظهار النافذة', 'error');
-  }
-}
-
-async function hideTranslatorOverlay() {
-  try {
-    await window.electronAPI.translatorHideOverlay();
-    document.getElementById('btnShowOverlay').style.display = 'flex';
-    document.getElementById('btnHideOverlay').style.display = 'none';
-  } catch (e) {
-    showToast('خطأ في إخفاء النافذة', 'error');
-  }
-}
-
-if (window.electronAPI && window.electronAPI.onTranslatorResult) {
-  window.electronAPI.onTranslatorResult((data) => {
-    const origEl = document.getElementById('translatorOriginalText');
-    const transEl = document.getElementById('translatorTranslatedText');
-    const statusEl = document.getElementById('translatorStatus');
-    const progressEl = document.getElementById('translatorProgress');
-
-    if (data.error) {
-      transEl.textContent = data.error;
-      transEl.style.color = '#ff3366';
-      statusEl.textContent = 'خطأ';
-      statusEl.style.background = 'rgba(255,51,102,0.1)';
-      statusEl.style.color = '#ff3366';
-      return;
-    }
-
-    if (data.original && data.original.length > 0) {
-      origEl.textContent = data.original;
-      origEl.style.display = 'block';
-    } else {
-      origEl.style.display = 'none';
-    }
-
-    if (data.translated && data.translated.length > 0) {
-      transEl.textContent = data.translated;
-      transEl.style.color = '#00e5ff';
-      statusEl.textContent = 'مترجم ✓';
-      statusEl.style.background = 'rgba(0,255,136,0.1)';
-      statusEl.style.color = '#00ff88';
-
-      const historyEl = document.getElementById('translatorHistory');
-      const historySection = document.getElementById('translatorHistorySection');
-      if (historyEl && historySection) {
-        historySection.style.display = 'block';
-        const item = document.createElement('div');
-        item.className = 'repair-result';
-        item.innerHTML = `<span class="result-name" style="direction:ltr; text-align:left; flex:1; font-size:11px; color:#8888bb;">${data.original.substring(0, 80)}${data.original.length > 80 ? '...' : ''}</span><span class="result-status success" style="font-size:12px;">${data.translated.substring(0, 60)}</span>`;
-        historyEl.insertBefore(item, historyEl.firstChild);
-        if (historyEl.children.length > 20) {
-          historyEl.removeChild(historyEl.lastChild);
-        }
-      }
-    } else {
-      transEl.textContent = 'لا يوجد نص للترجمة';
-      transEl.style.color = '#555577';
-      statusEl.textContent = 'بانتظار نص...';
-      statusEl.style.background = 'rgba(255,149,0,0.1)';
-      statusEl.style.color = '#ff9500';
-    }
-
-    if (translatorRunning && progressEl) {
-      document.getElementById('translatorText').textContent = 'جاري الترجمة المباشرة...';
-    }
-  });
 }
 
 // ==================== NETWORK MANAGER ====================

@@ -19,9 +19,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   toggleService: (serviceName, enable) => ipcRenderer.invoke('toggle-service', serviceName, enable),
 
-  translateText: (text, from, to) => ipcRenderer.invoke('translate-text', text, from, to),
-  translateGameTexts: (texts, from, to) => ipcRenderer.invoke('translate-game-texts', texts, from, to),
-
   scanGames: () => ipcRenderer.invoke('scan-games'),
   scanGamesForDisk: () => ipcRenderer.invoke('scan-games-for-disk'),
   selectGameFolder: () => ipcRenderer.invoke('select-game-folder'),
@@ -194,17 +191,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getCrackAttempts: () => ipcRenderer.invoke('get-crack-attempts'),
   getModificationLogs: () => ipcRenderer.invoke('get-modification-logs'),
 
-  translatorGetScreens: () => ipcRenderer.invoke('translator-get-screens'),
-  translatorStart: (opts) => ipcRenderer.invoke('translator-start', opts),
-  translatorStop: () => ipcRenderer.invoke('translator-stop'),
-  translatorUpdateSettings: (opts) => ipcRenderer.invoke('translator-update-settings', opts),
-  translatorGetSettings: () => ipcRenderer.invoke('translator-get-settings'),
-  translatorShowOverlay: () => ipcRenderer.invoke('translator-show-overlay'),
-  translatorHideOverlay: () => ipcRenderer.invoke('translator-hide-overlay'),
-  translatorCaptureOnce: (opts) => ipcRenderer.invoke('translator-capture-once', opts),
-  translatorGetHistory: () => ipcRenderer.invoke('translator-get-history'),
-  onTranslatorResult: (callback) => ipcRenderer.on('translator-result', (e, data) => callback(data)),
-
   getInstalledBloatware: () => ipcRenderer.invoke('get-installed-bloatware'),
   uninstallBloatware: (pkgName) => ipcRenderer.invoke('uninstall-bloatware', pkgName),
   uninstallAllBloatware: () => ipcRenderer.invoke('uninstall-all-bloatware'),
@@ -258,8 +244,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   startFpsOverlay: () => ipcRenderer.invoke('start-fps-overlay'),
   stopFpsOverlay: () => ipcRenderer.invoke('stop-fps-overlay'),
   isFpsOverlayRunning: () => ipcRenderer.invoke('is-fps-overlay-running'),
-  toggleOverlayMouse: (passthrough) => ipcRenderer.invoke('toggle-overlay-mouse', passthrough),
-
-  openRegionSelector: () => ipcRenderer.invoke('open-region-selector'),
-  regionSelected: (region) => ipcRenderer.send('region-selected', region)
+  toggleOverlayMouse: (passthrough) => ipcRenderer.invoke('toggle-overlay-mouse', passthrough)
 });

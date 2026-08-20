@@ -15,7 +15,6 @@ const fpsBoost = require('./services/fps-boost');
 const driverUpdate = require('./services/driver-update');
 const systemClean = require('./services/system-clean');
 const systemMonitor = require('./services/system-monitor');
-const gameTranslate = require('./services/game-translate');
 const gameSettings = require('./services/game-settings');
 const changeTracker = require('./services/change-tracker');
 const stutterFix = require('./services/stutter-fix');
@@ -208,8 +207,6 @@ ipcMain.handle('clean-system', requireLicense(async () => await systemClean.clea
 ipcMain.handle('get-drivers', async () => await driverUpdate.getDrivers());
 ipcMain.handle('update-driver', requireLicense(async (event, deviceId) => await driverUpdate.updateDriver(deviceId)));
 ipcMain.handle('toggle-service', requireLicense(async (event, serviceName, enable) => await systemClean.toggleService(serviceName, enable)));
-ipcMain.handle('translate-text', async (event, text, from, to) => await gameTranslate.translateText(text, from, to));
-ipcMain.handle('translate-game-texts', async (event, texts, from, to) => await gameTranslate.translateGameText(texts, from, to));
 ipcMain.handle('scan-games', async () => await gameSettings.scanGames());
 ipcMain.handle('scan-games-for-disk', async () => await gameSettings.scanGamesForDisk());
 ipcMain.handle('apply-game-preset', requireLicense(async (event, gamePath, presetName, configs) => await gameSettings.applyGamePreset(gamePath, presetName, configs)));
@@ -466,75 +463,4 @@ ipcMain.handle('get-crack-attempts', async () => {
 
 ipcMain.handle('get-modification-logs', async () => {
   return protection.getModificationLogs();
-});
-
-const gameTranslator = require('./services/game-translator');
-
-ipcMain.handle('translator-get-screens', async () => {
-  return await gameTranslator.getAvailableScreens();
-});
-
-ipcMain.handle('translator-start', requireLicense(async (e, opts) => {
-  return gameTranslator.startTranslation(opts);
-}));
-
-ipcMain.handle('translator-stop', async () => {
-  return gameTranslator.stopTranslation();
-});
-
-ipcMain.handle('translator-update-settings', requireLicense(async (e, opts) => {
-  return gameTranslator.updateSettings(opts);
-}));
-
-ipcMain.handle('translator-get-settings', async () => {
-  return gameTranslator.getSettings();
-});
-
-ipcMain.handle('translator-show-overlay', requireLicense(async () => {
-  gameTranslator.createOverlayWindow();
-  return { status: 'shown' };
-}));
-
-ipcMain.handle('translator-hide-overlay', async () => {
-  gameTranslator.closeOverlayWindow();
-  return { status: 'hidden' };
-});
-
-ipcMain.handle('translator-capture-once', requireLicense(async (e, opts) => {
-  if (opts) gameTranslator.updateSettings(opts);
-  await gameTranslator.processCapture();
-  return { status: 'captured' };
-}));
-
-ipcMain.handle('translator-get-history', async () => {
-  return gameTranslator.getHistory();
-});
-
-let regionResolve = null;
-ipcMain.handle('open-region-selector', async () => {
-  return new Promise((resolve) => {
-    regionResolve = resolve;
-    const { screen } = require('electron');
-    const { width, height } = screen.getPrimaryDisplay().size;
-    const regionWin = new BrowserWindow({
-      width, height, x: 0, y: 0,
-      frame: false, transparent: true, alwaysOnTop: true,
-      skipTaskbar: true, resizable: false, hasShadow: false,
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-        preload: path.join(__dirname, '../preload/preload.js')
-      }
-    });
-    regionWin.loadFile(path.join(__dirname, '../renderer/region-selector.html'));
-    regionWin.setAlwaysOnTop(true, 'screen-saver');
-    regionWin.setFullScreen(true);
-    regionWin.on('closed', () => {
-      if (regionResolve) { regionResolve(null); regionResolve = null; }
-    });
-  });
-});
-
-ipcMain.on('region-selected', (e, region) => {
-  if (regionResolve) { regionResolve(region); regionResolve = null; }
 });

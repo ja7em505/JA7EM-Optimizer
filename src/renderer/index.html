@@ -106,10 +106,6 @@
                 <span class="nav-icon">🖱️</span>
                 <span class="nav-text">تحسين الماوس</span>
               </li>
-              <li class="nav-item" data-page="gametranslator">
-                <span class="nav-icon">🌍</span>
-                <span class="nav-text">مترجم الألعاب</span>
-              </li>
               <li class="nav-item" data-page="fpsoverlay">
                 <span class="nav-icon">📟</span>
                 <span class="nav-text">FPS Overlay</span>
@@ -812,43 +808,6 @@
           </div>
         </div>
 
-        <!-- TRANSLATE -->
-        <div class="page" id="page-translate">
-          <div class="page-header">
-            <h1>ترجمة الألعاب</h1>
-            <p>ترجمة نصوص الألعاب من الإنجليزية إلى العربية</p>
-          </div>
-          <div class="translate-container">
-            <div class="translate-input-section">
-              <h3>النص الإنجليزي</h3>
-              <textarea id="translateInput" placeholder="أدخل النص الإنجليزي للترجمة..." rows="6"></textarea>
-            </div>
-            <div class="translate-actions">
-              <button class="btn-primary" onclick="translateText()">
-                <span>🔄</span> ترجمة
-              </button>
-              <select id="translateFrom">
-                <option value="en">الإنجليزية</option>
-                <option value="ja">اليابانية</option>
-                <option value="ko">الكورية</option>
-                <option value="zh">الصينية</option>
-              </select>
-              <span class="translate-arrow">→</span>
-              <select id="translateTo">
-                <option value="ar">العربية</option>
-              </select>
-            </div>
-            <div class="translate-output-section">
-              <h3>الترجمة العربية</h3>
-              <textarea id="translateOutput" placeholder="ستظهر الترجمة هنا..." rows="6" readonly></textarea>
-            </div>
-            <div class="translate-history">
-              <h3>سجل الترجمات</h3>
-              <div id="translateHistory" class="history-list"></div>
-            </div>
-          </div>
-        </div>
-
         <!-- WINDOWS REPAIR -->
         <div class="page" id="page-winrepair">
           <div class="page-header">
@@ -1486,143 +1445,6 @@
             <div class="empty-state" style="padding:16px;"><div class="empty-icon">🖱️</div><p>اضغط "تطبيق الكل" لإصلاح تأخير الإدخال</p></div>
           </div>
           <div class="repair-results" id="mouseResults"></div>
-        </div>
-
-        <!-- GAME TRANSLATOR -->
-        <div class="page" id="page-gametranslator">
-          <div class="page-header">
-            <h1>🌍 مترجم الألعاب بالوقت الفعلي</h1>
-            <p>ترجمة النصوص الإنجليزية في الألعاب مباشرة — OCR + ترجمة أونلاين</p>
-          </div>
-
-          <div class="hero-card" style="margin-bottom:20px;">
-            <div class="hero-icon">🔤</div>
-            <h3>كيف يعمل؟</h3>
-            <p>التقاط نص من الشاشة ← قراءة النص (OCR) ← ترجمة فورية للعربي. اختر منطقة محددة أو كل الشاشة.</p>
-          </div>
-
-          <div class="tweaks-grid" style="margin-bottom:20px;">
-            <div class="tweak-card" style="flex-direction:column; align-items:flex-start; gap:10px;">
-              <div class="tweak-name">🎮 وضع الترجمة</div>
-              <div class="tweak-desc" style="margin-bottom:8px;">التقاط نص من منطقة محددة من الشاشة</div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <select id="translatorMode" style="padding:7px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:8px; color:#e8e8ff; font-size:12px; cursor:pointer;">
-                  <option value="region">منطقة محددة</option>
-                  <option value="fullscreen">الشاشة الكاملة</option>
-                </select>
-                <select id="translatorScreen" style="padding:7px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:8px; color:#e8e8ff; font-size:12px; cursor:pointer;">
-                  <option value="0">الشاشة الرئيسية</option>
-                </select>
-              </div>
-            </div>
-            <div class="tweak-card" style="flex-direction:column; align-items:flex-start; gap:10px;">
-              <div class="tweak-name">⏱️ سرعة التحديث</div>
-              <div class="tweak-desc" style="margin-bottom:8px;">كل كم ميلي ثانية يحصل تحديث</div>
-              <div style="display:flex; gap:8px; align-items:center;">
-                <select id="translatorInterval" style="padding:7px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:8px; color:#e8e8ff; font-size:12px; cursor:pointer;">
-                  <option value="1000">سريع (1 ثانية)</option>
-                  <option value="2000" selected>عادي (2 ثانية)</option>
-                  <option value="3000">بطيء (3 ثواني)</option>
-                  <option value="5000">موفر (5 ثواني)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="tweaks-grid" style="margin-bottom:20px;">
-            <div class="tweak-card" style="flex-direction:column; align-items:flex-start; gap:10px;">
-              <div class="tweak-name">📐 منطقة التقاط النص</div>
-              <div class="tweak-desc" style="margin-bottom:8px;">حدد الإحداثيات يدوياً أو استخدم السحب بالماوس</div>
-              <div style="display:flex; gap:8px; margin-bottom:10px;">
-                <button class="btn btn-info" onclick="selectRegion()" style="padding:8px 16px; font-size:12px; display:flex; align-items:center; gap:6px;">
-                  <span style="font-size:16px;">🖱️</span> Select Region with Mouse
-                </button>
-              </div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
-                <div style="display:flex; align-items:center; gap:4px;">
-                  <span style="font-size:11px; color:#8888bb;">X:</span>
-                  <input id="regionX" type="number" value="100" style="width:70px; padding:5px 8px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:6px; color:#e8e8ff; font-size:12px;">
-                </div>
-                <div style="display:flex; align-items:center; gap:4px;">
-                  <span style="font-size:11px; color:#8888bb;">Y:</span>
-                  <input id="regionY" type="number" value="100" style="width:70px; padding:5px 8px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:6px; color:#e8e8ff; font-size:12px;">
-                </div>
-                <div style="display:flex; align-items:center; gap:4px;">
-                  <span style="font-size:11px; color:#8888bb;">العرض:</span>
-                  <input id="regionW" type="number" value="500" style="width:70px; padding:5px 8px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:6px; color:#e8e8ff; font-size:12px;">
-                </div>
-                <div style="display:flex; align-items:center; gap:4px;">
-                  <span style="font-size:11px; color:#8888bb;">الارتفاع:</span>
-                  <input id="regionH" type="number" value="200" style="width:70px; padding:5px 8px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:6px; color:#e8e8ff; font-size:12px;">
-                </div>
-              </div>
-            </div>
-            <div class="tweak-card" style="flex-direction:column; align-items:flex-start; gap:10px;">
-              <div class="tweak-name">🌐 اتجاه الترجمة</div>
-              <div class="tweak-desc">من اللغة إلى اللغة</div>
-              <div style="display:flex; gap:8px; align-items:center; margin-top:6px;">
-                <select id="translatorFrom" style="padding:7px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:8px; color:#e8e8ff; font-size:12px; cursor:pointer;">
-                  <option value="en">الإنجليزية</option>
-                  <option value="ja">اليابانية</option>
-                  <option value="ko">الكورية</option>
-                  <option value="zh">الصينية</option>
-                  <option value="fr">الفرنسية</option>
-                  <option value="de">الألمانية</option>
-                  <option value="es">الإسبانية</option>
-                  <option value="ru">الروسية</option>
-                </select>
-                <span style="color:#00c8ff; font-size:16px;">→</span>
-                <select id="translatorTo" style="padding:7px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,200,255,0.15); border-radius:8px; color:#e8e8ff; font-size:12px; cursor:pointer;">
-                  <option value="ar">العربية</option>
-                  <option value="en">الإنجليزية</option>
-                  <option value="fr">الفرنسية</option>
-                  <option value="de">الألمانية</option>
-                  <option value="es">الإسبانية</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-            <button class="btn-hero" id="btnStartTranslator" onclick="startGameTranslator()" style="display:flex; align-items:center; gap:8px;">
-              ▶️ بدء الترجمة المباشرة
-            </button>
-            <button class="btn-hero" id="btnStopTranslator" onclick="stopGameTranslator()" style="display:none; background:rgba(255,51,102,0.2); border:1px solid rgba(255,51,102,0.3); color:#ff3366; box-shadow:0 0 15px rgba(255,51,102,0.15); display:none;">
-              ⏹️ إيقاف الترجمة
-            </button>
-            <button class="btn-hero" onclick="translatorCaptureOnce()" style="background:rgba(170,68,255,0.2); border:1px solid rgba(170,68,255,0.3); color:#aa44ff; box-shadow:0 0 15px rgba(170,68,255,0.15); display:flex; align-items:center; gap:8px;">
-              📸 التقاط مرة واحدة
-            </button>
-            <button class="btn-hero" id="btnShowOverlay" onclick="showTranslatorOverlay()" style="background:rgba(0,255,136,0.2); border:1px solid rgba(0,255,136,0.3); color:#00ff88; box-shadow:0 0 15px rgba(0,255,136,0.15); display:flex; align-items:center; gap:8px;">
-              🪟 إظهار النافذة العائمة
-            </button>
-            <button class="btn-hero" id="btnHideOverlay" onclick="hideTranslatorOverlay()" style="background:rgba(255,149,0,0.2); border:1px solid rgba(255,149,0,0.3); color:#ff9500; box-shadow:0 0 15px rgba(255,149,0,0.15); display:none; align-items:center; gap:8px;">
-              🙈 إخفاء النافذة
-            </button>
-          </div>
-
-          <div class="repair-progress" id="translatorProgress" style="display:none;">
-            <h3 style="font-size:13px; margin-bottom:10px; color:var(--text-secondary);">جاري الترجمة...</h3>
-            <div class="progress-bar"><div class="progress-fill" id="translatorFill" style="width:0%"></div></div>
-            <div class="progress-text" id="translatorText">جاري بدء الترجمة...</div>
-          </div>
-
-          <div id="translatorPreview" style="margin-bottom:20px;">
-            <div class="tweak-card" style="flex-direction:column; gap:12px; padding:20px;">
-              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                <span style="font-size:18px;">📝</span>
-                <span style="font-size:14px; font-weight:700;">النص المترجم</span>
-                <span id="translatorStatus" style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(0,255,136,0.1); color:#00ff88; font-weight:700;">جاهز</span>
-              </div>
-              <div id="translatorOriginalText" style="font-size:12px; color:#8888bb; padding:10px; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid rgba(255,255,255,0.05); direction:ltr; text-align:left; line-height:1.6; display:none;"></div>
-              <div id="translatorTranslatedText" style="font-size:16px; font-weight:600; color:#00e5ff; padding:14px; background:linear-gradient(135deg, rgba(0,200,255,0.06), rgba(170,68,255,0.04)); border-radius:12px; border:1px solid rgba(0,200,255,0.15); line-height:2; min-height:50px; text-shadow:0 0 8px rgba(0,200,255,0.2);">اضغط "بدء الترجمة" لبدء التقاط النص وترجمته...</div>
-            </div>
-          </div>
-
-          <div id="translatorHistorySection" style="display:none;">
-            <h2 style="font-size:14px; margin-bottom:10px; color:var(--text-secondary);">سجل الترجمات</h2>
-            <div class="repair-results" id="translatorHistory" style="max-height:200px;"></div>
-          </div>
         </div>
 
         <!-- NETWORK MANAGER -->
