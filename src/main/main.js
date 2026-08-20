@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+﻿const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { autoUpdater } = require('electron-updater');
@@ -65,6 +65,7 @@ const protection = require('./protection');
 const CJ_OPTIMIZER_v1 = 'CJ_AUTHENTIC';
 const BY_CJ_ONLY = 'LICENSED_SOFTWARE';
 const DO_NOT_MODIFY = 'INTEGRITY_CHECK';
+const MAIN_CORE_HASH = '23062fa9b59256035dab1526eb9282aed12ef4ace871c5698bc60f4d23f1ef61';
 
 let mainWindow;
 let isLicensed = false;
@@ -150,6 +151,13 @@ app.whenReady().then(async () => {
       app.exit(1);
       return;
     }
+    const dualCheck = integrity.getCoreHash() === MAIN_CORE_HASH;
+    if (!dualCheck) {
+      console.log('[SECURITY] Pre-boot dual integrity FAILED');
+      protection.hardLock('integrity_failed');
+      app.exit(1);
+      return;
+    }
     const wmCheck = integrity.checkWatermarks();
     if (!wmCheck.valid) {
       console.log('[SECURITY] Pre-boot watermark FAILED');
@@ -218,7 +226,7 @@ ipcMain.handle('clear-change-log', async () => { changeTracker.clearLog(); retur
 ipcMain.handle('get-stutter-fixes', async () => await stutterFix.getFixDetails());
 ipcMain.handle('apply-stutter-fix', requireLicense(async (event, options) => await stutterFix.applyStutterFix(options)));
 ipcMain.handle('revert-stutter-fix', requireLicense(async () => await stutterFix.revertStutterFix()));
-ipcMain.handle('select-game-folder', async () => { const result = await dialog.showOpenDialog(mainWindow, { title: 'اختر مجلد اللعبة', properties: ['openDirectory'] }); if (result.canceled || result.filePaths.length === 0) return null; const gamePath = result.filePaths[0]; try { const items = fs.readdirSync(gamePath); const configsFound = []; const configFileNames = ['GameUserSettings.ini', 'Engine.ini', 'Settings.ini', 'Game.ini', 'settings.json', 'config.json', 'options.json', 'video.cfg', 'options.cfg', 'config.cfg', 'settings.cfg', 'settings.xml']; function searchConfigs(dir, depth) { if (depth > 4) return; try { const files = fs.readdirSync(dir); for (const file of files) { const filePath = path.join(dir, file); try { const stat = fs.statSync(filePath); if (stat.isDirectory()) searchConfigs(filePath, depth + 1); else { const name = file.toLowerCase(); if (configFileNames.some(cf => name === cf.toLowerCase())) { let type = 'ini'; if (name.endsWith('.json')) type = 'json'; else if (name.endsWith('.cfg')) type = 'cfg'; else if (name.endsWith('.xml')) type = 'xml'; configsFound.push({ path: filePath, type, name: file }); } } } catch (e) {} } } catch (e) {} } searchConfigs(gamePath, 0); return { name: gamePath, path: gamePath, configs: configsFound }; } catch (e) { return null; } });
+ipcMain.handle('select-game-folder', async () => { const result = await dialog.showOpenDialog(mainWindow, { title: 'Ø§Ø®ØªØ± Ù…Ø¬Ù„Ø¯ Ø§Ù„Ù„Ø¹Ø¨Ø©', properties: ['openDirectory'] }); if (result.canceled || result.filePaths.length === 0) return null; const gamePath = result.filePaths[0]; try { const items = fs.readdirSync(gamePath); const configsFound = []; const configFileNames = ['GameUserSettings.ini', 'Engine.ini', 'Settings.ini', 'Game.ini', 'settings.json', 'config.json', 'options.json', 'video.cfg', 'options.cfg', 'config.cfg', 'settings.cfg', 'settings.xml']; function searchConfigs(dir, depth) { if (depth > 4) return; try { const files = fs.readdirSync(dir); for (const file of files) { const filePath = path.join(dir, file); try { const stat = fs.statSync(filePath); if (stat.isDirectory()) searchConfigs(filePath, depth + 1); else { const name = file.toLowerCase(); if (configFileNames.some(cf => name === cf.toLowerCase())) { let type = 'ini'; if (name.endsWith('.json')) type = 'json'; else if (name.endsWith('.cfg')) type = 'cfg'; else if (name.endsWith('.xml')) type = 'xml'; configsFound.push({ path: filePath, type, name: file }); } } } catch (e) {} } } catch (e) {} } searchConfigs(gamePath, 0); return { name: gamePath, path: gamePath, configs: configsFound }; } catch (e) { return null; } });
 
 ipcMain.handle('repair-sfc', requireLicense(async () => { try { await new Promise((resolve, reject) => { require('child_process').exec('sfc /scannow', { timeout: 600000 }, (err) => err ? reject(err) : resolve()); }); return { status: 'success', message: 'SFC completed' }; } catch (e) { return { status: 'failed', message: e.message }; } }));
 ipcMain.handle('repair-dism', requireLicense(async () => { try { await new Promise((resolve, reject) => { require('child_process').exec('DISM /Online /Cleanup-Image /ScanHealth', { timeout: 600000 }, (err) => err ? reject(err) : resolve()); }); return { status: 'success', message: 'DISM completed' }; } catch (e) { return { status: 'failed', message: e.message }; } }));

@@ -17,6 +17,15 @@ const PROTECTED_FILES = [
   'src/renderer/renderer.js'
 ];
 
+const CORE_FILES = [
+  'src/main/license-manager.js',
+  'src/main/integrity.js',
+  'src/main/protection.js',
+  'src/preload/preload.js',
+  'src/renderer/index.html',
+  'src/renderer/renderer.js'
+];
+
 const HIDDEN_WATERMARKS = ['JA7EM_AUTHENTIC', 'LICENSED_SOFTWARE', 'INTEGRITY_CHECK'];
 
 function getAppRoot() {
@@ -42,6 +51,25 @@ function calculateCombinedHash() {
   return crypto.createHash('sha256').update(parts.join('|')).digest('hex');
 }
 
+function getCurrentHash() {
+  return calculateCombinedHash();
+}
+
+function calculateCoreHash() {
+  const root = getAppRoot();
+  const parts = [];
+  for (const file of CORE_FILES) {
+    const hash = calculateFileHash(path.join(root, file));
+    if (!hash) return null;
+    parts.push(hash);
+  }
+  return crypto.createHash('sha256').update(parts.join('|')).digest('hex');
+}
+
+function getCoreHash() {
+  return calculateCoreHash();
+}
+
 function verifyIntegrity() {
   try {
     const currentHash = calculateCombinedHash();
@@ -64,5 +92,5 @@ function checkWatermarks() {
 }
 
 module.exports = {
-  verifyIntegrity, checkWatermarks
+  verifyIntegrity, checkWatermarks, getCurrentHash, getCoreHash
 };
