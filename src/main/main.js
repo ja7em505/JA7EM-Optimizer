@@ -59,8 +59,8 @@ const windowsAppsUninstaller = require('./services/windows-apps-uninstaller');
 const autoMemoryCleaner = require('./services/auto-memory-cleaner');
 const gameFpsProfiles = require('./services/game-fps-profiles');
 const fpsOverlay = require('./services/fps-overlay');
-const discordRPC = require('./services/discord-rpc');
 const licenseManager = require('./license-manager');
+const integrity = require('./integrity');
 const protection = require('./protection');
 
 const CJ_OPTIMIZER_v1 = 'CJ_AUTHENTIC';
@@ -107,7 +107,7 @@ function createWindow() {
   });
 
   mainWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+    if (process.argv.includes('--dev') && input.control && input.shift && input.key.toLowerCase() === 'i') {
       event.preventDefault();
       mainWindow.webContents.toggleDevTools();
     }
@@ -140,6 +140,29 @@ app.whenReady().then(async () => {
       return;
     }
   }
+
+  // ---- Pre-boot integrity gate: refuse to open if files are tampered ----
+  try {
+    const preCheck = integrity.verifyIntegrity();
+    if (!preCheck.valid) {
+      console.log('[SECURITY] Pre-boot integrity FAILED:', preCheck.reason);
+      protection.hardLock('integrity_failed');
+      app.exit(1);
+      return;
+    }
+    const wmCheck = integrity.checkWatermarks();
+    if (!wmCheck.valid) {
+      console.log('[SECURITY] Pre-boot watermark FAILED');
+      protection.hardLock('integrity_failed');
+      app.exit(1);
+      return;
+    }
+  } catch (e) {
+    console.log('[SECURITY] Pre-boot integrity error:', e.message);
+    app.exit(1);
+    return;
+  }
+
   createWindow();
   isLicensed = licenseManager.isLicenseActive();
   protection.initialize(mainWindow);
@@ -329,8 +352,12 @@ ipcMain.handle('open-external', async (event, url) => await shell.openExternal(u
 ipcMain.handle('check-for-updates', async () => {
   try {
     const result = await autoUpdater.checkForUpdatesAndNotify();
-    return result && result.updateInfo ? { version: result.updateInfo.version } : null;
-  } catch (e) { return null; }
+    if (!result) return { available: false };
+    if (result.isUpdateAvailable) {
+      return { available: true, version: result.updateInfo.version };
+    }
+    return { available: false, version: result.updateInfo.version };
+  } catch (e) { return { available: false, error: e.message }; }
 });
 ipcMain.handle('install-update', () => { autoUpdater.quitAndInstall(); });
 
@@ -359,11 +386,6 @@ ipcMain.handle('check-license-status', async () => {
 ipcMain.handle('get-license-status', async () => {
   return licenseManager.getLicenseStatus();
 });
-
-ipcMain.handle('discord-rpc-start', async () => await discordRPC.start());
-ipcMain.handle('discord-rpc-stop', async () => await discordRPC.stop());
-ipcMain.handle('discord-rpc-status', async () => discordRPC.getStatus());
-ipcMain.handle('discord-rpc-toggle', async (event, val) => discordRPC.setEnabled(val));
 
 ipcMain.handle('get-installed-bloatware', async () => await bloatwareRemover.getInstalledBloatware());
 ipcMain.handle('uninstall-bloatware', requireLicense(async (event, pkgName) => await bloatwareRemover.uninstallBloatware(pkgName)));

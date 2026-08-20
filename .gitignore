@@ -4,4 +4,9 @@ dist/
 admin/
 .env
 src/main/license-token.js
-src/main/integrity-expected.js
+*.log
+latest.yml
+error-log.txt
+stdout.txt
+stderr.txt
+out/

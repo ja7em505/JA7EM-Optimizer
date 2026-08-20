@@ -225,7 +225,6 @@ async function loadAppVersion() {
     if (!version) return;
     const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
     setText('app-version', 'v' + version);
-    setText('activity-version', 'CJ OPTIMIZER v' + version);
     setText('footer-version', 'CJ OPTIMIZER v' + version);
   } catch (e) {}
 }
@@ -235,13 +234,13 @@ async function checkForUpdates() {
   if (btn) { btn.textContent = '⏳ Checking...'; btn.disabled = true; }
   try {
     const result = await window.electronAPI.checkForUpdates();
-    if (result && result.version) {
-      showToast('Update v' + result.version + ' found — downloading now...', 'info');
+    if (result && result.available) {
+      showToast('تحديث جديد متوفر v' + result.version + ' — جاري التحميل...', 'info');
     } else {
-      showToast('You are up to date — no update available', 'info');
+      showToast('لا يوجد تحديث — أنت على أحدث إصدار', 'success');
     }
   } catch (e) {
-    showToast('Could not check for updates — try again later', 'info');
+    showToast('تعذر فحص التحديثات — حاول لاحقًا', 'info');
   } finally {
     if (btn) { btn.textContent = '🔄 Check Update'; btn.disabled = false; }
   }
@@ -280,82 +279,6 @@ function toggleNavSection(el) {
   const group = el.nextElementSibling;
   if (group && group.classList.contains('nav-items-group')) {
     group.classList.toggle('collapsed');
-  }
-}
-
-// ==================== DISCORD RPC ====================
-async function initDiscordRpc() {
-  const toggle = document.getElementById('activityToggle');
-  const saved = localStorage.getItem('discordActivityEnabled');
-  if (saved === '0') {
-    toggle.checked = false;
-    document.getElementById('discordActivity').classList.add('hidden');
-  }
-  if (toggle.checked) {
-    await startDiscordRpc();
-  }
-  updateRpcBadge();
-}
-
-async function startDiscordRpc() {
-  const badge = document.getElementById('rpcBadge');
-  const indicator = document.getElementById('rpcIndicator');
-  if (badge) badge.textContent = 'جاري الاتصال...';
-  try {
-    const res = await window.electronAPI.discordRpcStart();
-    if (res.status === 'connected') {
-      if (badge) badge.textContent = '🟢 متصل';
-      if (indicator) indicator.textContent = '🟢';
-    } else if (res.status === 'disabled') {
-      if (badge) badge.textContent = '⚪ متوقف';
-      if (indicator) indicator.textContent = '';
-    } else {
-      if (badge) badge.textContent = '🔴 غير متصل';
-      if (indicator) indicator.textContent = '';
-    }
-  } catch (e) {
-    if (badge) badge.textContent = '🔴 خطأ';
-  }
-}
-
-async function stopDiscordRpc() {
-  const badge = document.getElementById('rpcBadge');
-  const indicator = document.getElementById('rpcIndicator');
-  try {
-    await window.electronAPI.discordRpcStop();
-    if (badge) badge.textContent = '⚪ متوقف';
-    if (indicator) indicator.textContent = '';
-  } catch (e) {}
-}
-
-async function updateRpcBadge() {
-  try {
-    const status = await window.electronAPI.discordRpcStatus();
-    const badge = document.getElementById('rpcBadge');
-    const indicator = document.getElementById('rpcIndicator');
-    if (status.connected) {
-      if (badge) badge.textContent = '🟢 متصل';
-      if (indicator) indicator.textContent = '🟢';
-    } else if (!status.enabled) {
-      if (badge) badge.textContent = '⚪ متوقف';
-      if (indicator) indicator.textContent = '';
-    } else {
-      if (badge) badge.textContent = '🔴 غير متصل';
-      if (indicator) indicator.textContent = '';
-    }
-  } catch (e) {}
-}
-
-function toggleActivity() {
-  const on = document.getElementById('activityToggle').checked;
-  const el = document.getElementById('discordActivity');
-  if (el) el.classList.toggle('hidden', !on);
-  localStorage.setItem('discordActivityEnabled', on ? '1' : '0');
-  window.electronAPI.discordRpcToggle(on);
-  if (on) {
-    startDiscordRpc();
-  } else {
-    stopDiscordRpc();
   }
 }
 
@@ -3303,11 +3226,6 @@ async function cleanAllBrowsers() {
   loadBrowserSizes();
 }
 
-const dcBtn = document.getElementById('discordBtn');
-if (dcBtn) dcBtn.addEventListener('click', () => {
-  window.electronAPI.openExternal('https://discord.com/users/0');
-});
-
 window.loadSsdTweaks = loadSsdTweaks;
 window.applyAllSsdTweaks = applyAllSsdTweaks;
 window.revertAllSsdTweaks = revertAllSsdTweaks;
@@ -3351,6 +3269,4 @@ window.electronAPI.onUpdateDownloaded((version) => {
 loadDashboard();
 
 setTimeout(() => {
-  initDiscordRpc();
-  setInterval(updateRpcBadge, 10000);
 }, 2000);

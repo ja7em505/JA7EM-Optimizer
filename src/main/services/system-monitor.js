@@ -1,5 +1,5 @@
 const os = require('os');
-const si = require('systeminformation');
+const { exec } = require('child_process');
 
 let _cachedGpu = null;
 let _cachedDisk = null;
@@ -10,17 +10,22 @@ async function getSystemInfo() {
   const cpus = os.cpus();
   const totalMem = os.totalmem();
   const freeMem = os.freemem();
+
   let gpuInfo = _cachedGpu || 'N/A';
   if (!_cachedGpu && Date.now() - _gpuTimer > 10000) {
     _gpuTimer = Date.now();
     try {
-      const gpu = await si.graphics();
-      if (gpu.controllers.length > 0) {
-        gpuInfo = gpu.controllers[0].model || 'N/A';
-        _cachedGpu = gpuInfo;
-      }
+      gpuInfo = await new Promise((resolve, reject) => {
+        exec('powershell -Command "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name"',
+          { encoding: 'utf-8', timeout: 8000 }, (err, stdout) => {
+            if (err) reject(err);
+            else resolve(stdout.trim().split('\n')[0] || 'N/A');
+          });
+      });
+      _cachedGpu = gpuInfo;
     } catch (e) {}
   }
+
   return {
     hostname: os.hostname(),
     platform: os.platform(),
@@ -48,21 +53,29 @@ async function getLiveStats() {
     const idle = cpu.times.idle;
     return acc + ((total - idle) / total);
   }, 0) / cpus.length * 100;
+
   const totalMem = os.totalmem();
   const freeMem = os.freemem();
   const memUsage = ((totalMem - freeMem) / totalMem) * 100;
+
   let diskUsage = _cachedDisk || 0;
   if (Date.now() - _diskTimer > 5000) {
     _diskTimer = Date.now();
     try {
-      const disks = await si.fsSize();
-      const cDrive = disks.find(d => d.fs === 'C:');
-      if (cDrive) {
-        diskUsage = Math.round(cDrive.use);
-        _cachedDisk = diskUsage;
-      }
+      const diskData = await new Promise((resolve, reject) => {
+        exec('powershell -Command "Get-CimInstance Win32_LogicalDisk -Filter \\"DeviceID=\'C:\'\\\" | Select-Object FreeSpace,Size | ConvertTo-Json"',
+          { encoding: 'utf-8', timeout: 8000 }, (err, stdout) => {
+            if (err) reject(err);
+            else resolve(JSON.parse(stdout));
+          });
+      });
+      const free = diskData.FreeSpace || 0;
+      const total = diskData.Size || 1;
+      diskUsage = Math.round(((total - free) / total) * 100);
+      _cachedDisk = diskUsage;
     } catch (e) {}
   }
+
   return {
     cpu: Math.round(cpuUsage * 10) / 10,
     memory: Math.round(memUsage * 10) / 10,

@@ -74,7 +74,7 @@ async function cleanAll() {
 async function createRestorePoint() {
   try {
     await runFireAndForget(
-      'powershell -Command "Checkpoint-Computer -Description \'CJ Optimizer Backup\' -RestorePointType MODIFY_SETTINGS"',
+      'powershell -Command "Checkpoint-Computer -Description \'JA7EM Optimizer Backup\' -RestorePointType MODIFY_SETTINGS"',
       120000
     );
     return { status: 'success', message: 'تم إنشاء نقطة استعادة بنجاح' };

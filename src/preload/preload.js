@@ -205,11 +205,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   translatorGetHistory: () => ipcRenderer.invoke('translator-get-history'),
   onTranslatorResult: (callback) => ipcRenderer.on('translator-result', (e, data) => callback(data)),
 
-  discordRpcStart: () => ipcRenderer.invoke('discord-rpc-start'),
-  discordRpcStop: () => ipcRenderer.invoke('discord-rpc-stop'),
-  discordRpcStatus: () => ipcRenderer.invoke('discord-rpc-status'),
-  discordRpcToggle: (val) => ipcRenderer.invoke('discord-rpc-toggle', val),
-
   getInstalledBloatware: () => ipcRenderer.invoke('get-installed-bloatware'),
   uninstallBloatware: (pkgName) => ipcRenderer.invoke('uninstall-bloatware', pkgName),
   uninstallAllBloatware: () => ipcRenderer.invoke('uninstall-all-bloatware'),

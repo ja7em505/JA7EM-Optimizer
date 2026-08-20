@@ -7,38 +7,38 @@
   <link rel="stylesheet" href="styles/app.css">
 </head>
 <body>
-  <div id="license-screen" style="position:fixed; top:0; left:0; right:0; bottom:0; z-index:10000; background:linear-gradient(135deg, #0a0a1a, #1a0a2e, #0a1a2e); display:flex; align-items:center; justify-content:center;">
-    <div style="text-align:center; max-width:500px; width:90%;">
-      <div style="font-size:3em; margin-bottom:10px; background:linear-gradient(135deg, #00d4ff, #7c3aed, #f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:bold;">CJ</div>
-      <div style="font-size:1.2em; color:#888; margin-bottom:30px;">Optimizer</div>
+  <div id="license-screen" style="position:fixed; top:0; left:0; right:0; bottom:0; z-index:10000; background:radial-gradient(ellipse at 50% 30%, #141a3a 0%, #0a0a1a 55%, #04050d 100%); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+    <div style="text-align:center; max-width:500px; width:90%; position:relative; z-index:2;">
+      <div style="font-size:3.2em; margin-bottom:10px; background:linear-gradient(135deg, #00f0ff, #a44dff, #ff2ec4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:bold; filter:drop-shadow(0 0 16px rgba(0,240,255,0.4));">CJ</div>
+      <div style="font-size:1.2em; color:#8b90c0; margin-bottom:30px; letter-spacing:6px;">OPTIMIZER</div>
 
       <div id="license-activate-section">
-        <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:30px;">
-          <h2 style="color:#00d4ff; margin-bottom:8px; font-size:1.3em;">&#128274; Activate License</h2>
-          <p style="color:#888; margin-bottom:20px; font-size:0.9em;">Enter your license key to activate CJ Optimizer</p>
-          <input id="license-key-input" type="text" placeholder="CJ-XXXX-XXXX-XXXX" style="width:100%; padding:14px 16px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#fff; font-size:1.2em; text-align:center; font-family:monospace; letter-spacing:2px; margin-bottom:16px; outline:none;">
-          <button id="activate-btn" onclick="activateLicense()" style="width:100%; padding:14px; background:linear-gradient(135deg, #22c55e, #10b981); border:none; border-radius:8px; color:#fff; font-size:1.1em; font-weight:bold; cursor:pointer;">Activate</button>
+        <div style="background:rgba(10,12,32,0.85); border:1px solid rgba(0,240,255,0.25); border-radius:8px; padding:30px; box-shadow:0 0 30px rgba(0,240,255,0.08), inset 0 0 30px rgba(0,240,255,0.04);">
+          <h2 style="color:#00f0ff; margin-bottom:8px; font-size:1.3em; text-shadow:0 0 12px rgba(0,240,255,0.5);">&#128274; Activate License</h2>
+          <p style="color:#8b90c0; margin-bottom:20px; font-size:0.9em;">Enter your license key to activate CJ Optimizer</p>
+          <input id="license-key-input" type="text" placeholder="CJ-XXXX-XXXX-XXXX" style="width:100%; padding:14px 16px; background:rgba(255,255,255,0.06); border:1px solid rgba(0,240,255,0.2); border-radius:6px; color:#fff; font-size:1.2em; text-align:center; font-family:monospace; letter-spacing:2px; margin-bottom:16px; outline:none;">
+          <button id="activate-btn" onclick="activateLicense()" style="width:100%; padding:14px; background:linear-gradient(135deg, #00f0ff, #a44dff); border:none; border-radius:6px; color:#fff; font-size:1.1em; font-weight:bold; cursor:pointer; box-shadow:0 0 18px rgba(0,240,255,0.3);">Activate</button>
           <div id="license-msg" style="margin-top:12px;"></div>
           <p style="color:#555; margin-top:16px; font-size:0.8em;">Don't have a key? Contact CJ on Discord: cj_</p>
         </div>
       </div>
 
       <div id="license-info-section" style="display:none;">
-        <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:30px;">
+        <div style="background:rgba(10,12,32,0.85); border:1px solid rgba(0,255,157,0.25); border-radius:8px; padding:30px; box-shadow:0 0 30px rgba(0,255,157,0.08);">
           <div style="font-size:4em; margin-bottom:10px;">&#10004;&#65039;</div>
-          <h2 style="color:#22c55e; margin-bottom:16px; font-size:1.4em;">License Active</h2>
+          <h2 style="color:#00ff9d; margin-bottom:16px; font-size:1.4em; text-shadow:0 0 12px rgba(0,255,157,0.4);">License Active</h2>
 
-          <div id="license-key-display" style="background:rgba(0,0,0,0.3); padding:12px 20px; border-radius:8px; font-family:monospace; font-size:1.1em; color:#00ff88; margin-bottom:16px; border:1px solid rgba(0,255,136,0.2);"></div>
+          <div id="license-key-display" style="background:rgba(0,0,0,0.3); padding:12px 20px; border-radius:6px; font-family:monospace; font-size:1.1em; color:#00ff9d; margin-bottom:16px; border:1px solid rgba(0,255,157,0.25);"></div>
 
-          <div id="license-type-display" style="color:#888; margin-bottom:8px; font-size:0.9em;"></div>
+          <div id="license-type-display" style="color:#8b90c0; margin-bottom:8px; font-size:0.9em;"></div>
 
-          <div id="license-expiry-box" style="background:rgba(124,58,237,0.15); border:1px solid rgba(124,58,237,0.3); border-radius:12px; padding:16px; margin-bottom:16px;">
-            <div style="color:#888; font-size:0.85em; margin-bottom:6px;">Time Remaining</div>
-            <div id="license-countdown" style="font-size:1.8em; font-weight:bold; background:linear-gradient(135deg, #7c3aed, #00d4ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"></div>
+          <div id="license-expiry-box" style="background:rgba(164,77,255,0.15); border:1px solid rgba(164,77,255,0.35); border-radius:8px; padding:16px; margin-bottom:16px;">
+            <div style="color:#8b90c0; font-size:0.85em; margin-bottom:6px;">Time Remaining</div>
+            <div id="license-countdown" style="font-size:1.8em; font-weight:bold; background:linear-gradient(135deg, #a44dff, #00f0ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"></div>
             <div id="license-expiry-date" style="color:#666; font-size:0.8em; margin-top:4px;"></div>
           </div>
 
-          <button onclick="deactivateLicense()" style="width:100%; padding:12px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:8px; color:#ef4444; font-size:0.9em; cursor:pointer;">Deactivate License</button>
+          <button onclick="deactivateLicense()" style="width:100%; padding:12px; background:rgba(255,61,110,0.12); border:1px solid rgba(255,61,110,0.35); border-radius:6px; color:#ff3d6e; font-size:0.9em; cursor:pointer;">Deactivate License</button>
         </div>
       </div>
     </div>
@@ -330,21 +330,21 @@
             </div>
           </div>
           <div class="stats-grid" id="systemStats">
-          <div id="dashboard-license-info" style="background:rgba(124,58,237,0.12); border:1px solid rgba(124,58,237,0.25); border-radius:14px; padding:18px 24px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+          <div id="dashboard-license-info" style="background:rgba(0,240,255,0.07); border:1px solid rgba(0,240,255,0.28); border-radius:8px; padding:18px 24px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; box-shadow:0 0 18px rgba(0,240,255,0.06);">
             <div style="display:flex; align-items:center; gap:14px;">
-              <div style="width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg, #7c3aed, #06b6d4); display:flex; align-items:center; justify-content:center; font-size:20px;">&#128273;</div>
+              <div style="width:44px; height:44px; border-radius:8px; background:linear-gradient(135deg, #a44dff, #00f0ff); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 0 14px rgba(164,77,255,0.4);">&#128273;</div>
               <div>
-                <div style="color:#ccc; font-size:0.85em;">License</div>
-                <div id="dashLicenseKey" style="font-family:monospace; color:#00ff88; font-size:1.05em;">N/A</div>
+                <div style="color:#8b90c0; font-size:0.85em;">License</div>
+                <div id="dashLicenseKey" style="font-family:monospace; color:#00ff9d; font-size:1.05em; text-shadow:0 0 8px rgba(0,255,157,0.3);">N/A</div>
               </div>
             </div>
             <div style="text-align:center;">
-              <div style="color:#888; font-size:0.8em;">Type</div>
+              <div style="color:#8b90c0; font-size:0.8em;">Type</div>
               <div id="dashLicenseType" style="color:#ddd; font-size:0.95em;">N/A</div>
             </div>
             <div style="text-align:right;">
-              <div style="color:#888; font-size:0.8em;">Time Remaining</div>
-              <div id="dashLicenseCountdown" style="font-size:1.3em; font-weight:bold; background:linear-gradient(135deg, #7c3aed, #00d4ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">N/A</div>
+              <div style="color:#8b90c0; font-size:0.8em;">Time Remaining</div>
+              <div id="dashLicenseCountdown" style="font-size:1.3em; font-weight:bold; background:linear-gradient(135deg, #a44dff, #00f0ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">N/A</div>
               <div id="dashLicenseExpiry" style="color:#666; font-size:0.75em;"></div>
             </div>
           </div>
@@ -406,50 +406,7 @@
             </div>
           </div>
 
-          <!-- DISCORD SECTION -->
-          <div class="discord-section">
-            <div class="discord-section-title">
-              <span class="discord-section-icon">💬</span>
-              <span class="team-cj-title">TEAM CJ</span>
-              <span class="discord-rpc-badge" id="rpcBadge">غير متصل</span>
-            </div>
-            <div class="discord-profiles">
-              <div class="discord-card">
-                <div class="discord-bg"></div>
-                <div class="discord-content">
-                  <div class="discord-left">
-                    <div class="discord-avatar">
-                      <div class="discord-avatar-ring"></div>
-                      <div class="discord-avatar-letter">
-                        <img src="discord-avatar.png" alt="cj_" class="discord-avatar-img">
-                      </div>
-                    </div>
-                  </div>
-                  <div class="discord-right">
-                    <div class="discord-badge">CJ</div>
-                    <div class="discord-name">cj_</div>
-                    <div class="discord-status">
-                      <span class="discord-status-dot"></span>
-                      مطور
-                    </div>
-                    <div class="discord-activity" id="discordActivity">
-                      <span class="activity-icon">▶</span>
-                      <span class="activity-text" id="activity-version">CJ OPTIMIZER v1.0.0</span>
-                      <span class="activity-status" id="rpcIndicator"></span>
-                    </div>
-                    <p class="discord-desc">مختص بتطوير البرامج وصفحات الويب وبوتات الديسكورد</p>
-                    <label class="activity-toggle">
-                      <input type="checkbox" id="activityToggle" checked onchange="toggleActivity()">
-                      <span class="activity-toggle-track"></span>
-                      <span class="activity-toggle-label">إظهار في ديسكورد</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-           <div class="dashboard-footer">
+          <div class="dashboard-footer">
             <div class="footer-line"></div>
             <div class="footer-brand" id="footer-version">CJ OPTIMIZER v1.0.0</div>
             <div class="footer-copy">© 2026 CJ — صُنع بـ ❤️ لأفضل تجربة ألعاب</div>

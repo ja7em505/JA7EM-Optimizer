@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 
-const CONFIG_DIR = path.join(process.env.APPDATA || process.env.HOME, 'CJ-Optimizer');
+const CONFIG_DIR = path.join(process.env.APPDATA || process.env.HOME, 'JA7EM-Optimizer');
 const CHANGES_FILE = path.join(CONFIG_DIR, 'changes-log.json');
 
 function ensureDir() {
