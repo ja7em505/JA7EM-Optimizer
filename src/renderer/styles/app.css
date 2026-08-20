@@ -1958,8 +1958,6 @@ body::after {
 .logo-large {
   font-size: 30px;
   background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-purple) 45%, var(--neon-magenta) 100%);
-  background-size: 200% 200%;
-  animation: logoShift 4s ease infinite;
   filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.5));
 }
 @keyframes logoShift {
@@ -2027,15 +2025,9 @@ body::after {
 .page-header h1 {
   font-size: 24px;
   background: linear-gradient(90deg, #fff, var(--neon-blue), var(--neon-purple), #fff);
-  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: sheen 5s linear infinite;
 }
-@keyframes sheen {
-  to { background-position: 200% center; }
-}
-
 /* ---------- DASHBOARD HERO ---------- */
 .dashboard-hero {
   border-radius: 6px;
@@ -2069,8 +2061,6 @@ body::after {
 }
 .hero-brand {
   background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple) 45%, var(--neon-magenta));
-  background-size: 200% 200%;
-  animation: logoShift 4s ease infinite;
   filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.55));
 }
 
