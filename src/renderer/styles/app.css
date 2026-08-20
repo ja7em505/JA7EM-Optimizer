@@ -220,7 +220,6 @@ body::after {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 2px;
-  filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.3));
 }
 
 .version {
@@ -403,7 +402,6 @@ body::after {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 3px;
-  filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.3));
 }
 
 .branding-tagline {
@@ -529,7 +527,6 @@ body::after {
   background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.3));
 }
 
 .dashboard-hero-sub {
@@ -1958,7 +1955,6 @@ body::after {
 .logo-large {
   font-size: 30px;
   background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-purple) 45%, var(--neon-magenta) 100%);
-  filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.5));
 }
 @keyframes logoShift {
   0%, 100% { background-position: 0% 50%; }
@@ -2061,7 +2057,6 @@ body::after {
 }
 .hero-brand {
   background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple) 45%, var(--neon-magenta));
-  filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.55));
 }
 
 .dashboard-hero-badge {
@@ -2192,7 +2187,6 @@ body::after {
   background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-magenta));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.35));
 }
 
 /* ---------- MISC SECTIONS ---------- */
