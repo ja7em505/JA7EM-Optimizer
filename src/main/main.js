@@ -94,7 +94,8 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false
     },
-    backgroundColor: '#0a0a0a'
+    icon: path.join(__dirname, '../../assets/icon.png'),
+    backgroundColor: '#04050d'
   });
 
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
