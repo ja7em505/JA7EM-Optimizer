@@ -1955,6 +1955,8 @@ body::after {
 .logo-large {
   font-size: 30px;
   background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-purple) 45%, var(--neon-magenta) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 @keyframes logoShift {
   0%, 100% { background-position: 0% 50%; }
@@ -2057,6 +2059,8 @@ body::after {
 }
 .hero-brand {
   background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple) 45%, var(--neon-magenta));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .dashboard-hero-badge {
